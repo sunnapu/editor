@@ -29,7 +29,6 @@ require([
             Application.__super__.initialize.apply(this, arguments);
 
             this.editor = null;
-            return this;
         },
 
         templateContext: function() {

@@ -23545,7 +23545,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397057975969,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397059361452,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -23717,6 +23717,556 @@ define('platform/infos',[
             local: LocalFs
         }
     };
+});
+define('utils/dragdrop',[
+    'hr/utils',
+    'hr/hr',
+    'hr/dom'
+], function (_, hr, $) {
+    // Evnts for tablet and desktop
+    var events = {
+        'start': "mousedown",
+        'stop': "mouseup",
+        'move': "mousemove",
+        'enter': "mouseenter",
+        'leave': "mouseleave"
+    };
+
+    if (navigator.userAgent.search('Mobile') > 0) {
+        events = {
+            'start': "touchstart",
+            'stop': "touchend",
+            'move': "touchmove",
+            'enter': "touchenter",
+            'leave': "touchleave"
+        };
+    }
+
+    // Define cursor
+    var storedStylesheet = null;
+    var setCursor = function(cs) {
+        // Reset cursor
+        if (storedStylesheet) storedStylesheet.remove();
+        storedStylesheet = null;
+
+        // Set new cursor
+        if (cs) storedStylesheet = $( "<style>*{ cursor: "+cs+" !important; }</style>" ).appendTo($("body"));
+    };
+    var resetCursor = _.partial(setCursor, null);
+
+    var DropArea = hr.Class.extend({
+        defaults: {
+            // View for this area
+            view: null,
+
+            // Class when drop data
+            className: "dragover",
+
+            // Draggable type
+            dragType: null,
+
+            // Handler for drop
+            handler: null,
+
+            // Contrain elastic
+            constrain: null
+        },
+
+        initialize: function() {
+            DropArea.__super__.initialize.apply(this, arguments);
+            var that = this;
+
+            this.view = this.options.view;
+            this.$el = this.view.$el;
+
+            this.dragType = this.options.dragType;
+
+            this.$el.on(events["enter"], function(e) {
+                if (that.dragType.isDragging()) {
+                    e.stopPropagation();
+                    that.dragType.enterDropArea(that);
+                    that.$el.addClass("dragover");
+                }
+            });
+
+            this.$el.on(events["leave"], function(e) {
+                that.$el.removeClass("dragover");
+                that.dragType.exitDropArea();
+            });
+
+            this.on("drop", function() {
+                that.$el.removeClass("dragover");
+            });
+
+            if (this.options.handler) this.on("drop", this.options.handler);
+        }
+    });
+
+    var DraggableType = hr.Class.extend({
+        initialize: function() {
+            DraggableType.__super__.initialize.apply(this, arguments);
+
+            // Data transfered
+            this.data = null;
+
+            // State
+            this.state = true;
+
+            // Drop handler
+            this.drop = [];
+        },
+
+        // Toggle enable/disable drag and drop
+        toggle: function(st) {
+            this.state = st;
+            return this;
+        },
+
+        // Is currently dragging data
+        isDragging: function() {
+            return this.data != null;
+        },
+
+        // Get drop
+        getDrop: function() {
+            return (this.drop.length > 0)? this.drop[this.drop.length - 1] : null;
+        },
+
+        // Enter drop area
+        enterDropArea: function(area) {
+            //console.log("enter drop", this.drop.length, area.$el.get(0));
+            this.drop.push(area);
+        },
+
+        // Exit drop area
+        exitDropArea: function() {
+            this.drop.pop();
+            //console.log("exit drop", this.drop.length);
+        },
+
+        // Enable drag and drop in a object
+        enableDrag: function(options) {
+            var that = this, $document = $(document), $el, data;
+
+            options = _.defaults(options || {}, {
+                // View to drag
+                view: null,
+
+                // Element to drag
+                el: null,
+
+                // Data to transfer
+                data: null,
+
+                // Base drop area
+                baseDropArea: null,
+
+                // Before dragging
+                start: null,
+
+                // Cursor
+                cursor: "copy"
+            });
+            if (options.el) $el = $(options.el);
+            if (options.view) $el = options.view.$el, data = options.view;
+            if (options.data) data = options.data;
+
+            $el.on(events["start"], function(e) {
+                if (e.type == 'mousedown' && e.originalEvent.button != 0) return;
+                if (!that.state) return;
+                e.preventDefault();
+
+                var dx, dy, hasMove = false;
+
+                // origin mouse
+                var oX = e.pageX;
+                var oY = e.pageY;
+
+                // origin element
+                var poX = $el.offset().left;
+                var poY = $el.offset().top;
+
+                // element new position
+                var ex, ey, ew, eh;
+                ew = $el.width();
+                eh = $el.height();
+
+                // Contrain element
+                var cw, ch, cx, cy;
+
+                that.drop = [];
+                if (options.baseDropArea) that.enterDropArea(options.baseDropArea);
+                that.data = data;
+
+                if (options.start) options.start();
+
+                var f = function(e) {
+                    var _drop = that.getDrop();
+
+                    dx = oX - e.pageX;
+                    dy = oY - e.pageY;
+
+                    if (Math.abs(dx) > 20 || Math.abs(dy) > 20) {
+                        if (!hasMove) {
+                            setCursor(options.cursor);
+                            $el.addClass("move");
+                        }
+                        hasMove = true;
+                    }
+
+                    ex = poX - dx;
+                    ey = poY - dy;
+
+                    if (_drop && _drop.options.constrain) {
+                        cw = _drop.$el.width();
+                        ch = _drop.$el.height();
+                        cx = _drop.$el.offset().left;
+                        cy = _drop.$el.offset().top;
+
+                        if (Math.abs(ey - cy) < 50) ey = cy;
+                        if (Math.abs((ey + eh) - (cy+ch)) < 50) ey = cy + ch - eh;
+                        if (Math.abs(ex - cx) < 50) ex = cx;
+                        if (Math.abs((ex + ew) - (cx+cw)) < 50) ex = cx + cw - ew;
+                    }
+
+                    $el.css({
+                        'left': ex,
+                        'top': ey
+                    });
+                };
+
+                $document.on(events["move"], f);
+                $document.one(events["stop"], function(e) {
+                    $document.unbind(events["move"], f);
+                    resetCursor();
+
+                    var _drop = that.getDrop();
+
+                    if (hasMove && (!options.baseDropArea || !_drop || (options.baseDropArea.cid != _drop.cid))) {
+                        if (_drop) {
+                            _drop.trigger("drop", that.data);
+                        }
+                        that.trigger("drop", _drop, that.data);
+                    }
+
+                    that.data = null;
+                    that.drop = [];
+
+                    $el.removeClass("move");
+                    $el.css({
+                        'left': "auto",
+                        'top': "auto"
+                    });
+                });
+            });
+        }
+    });
+
+    return {
+        events: events,
+        cursor: {
+            set: setCursor,
+            reset: resetCursor
+        },
+        DropArea: DropArea,
+        DraggableType: DraggableType
+    };
+});
+define('views/grid',[
+    "hr/utils",
+    "hr/dom",
+    "hr/hr",
+    "utils/dragdrop"
+], function(_, $, hr, dnd) {
+    var GridView = hr.View.extend({
+        className: "grid",
+        defaults: {
+            columns: 0 // 0 means auto
+        },
+        events: {
+            
+        },
+
+        initialize: function() {
+            GridView.__super__.initialize.apply(this, arguments);
+
+            this.columns = this.options.columns;
+            this.views = [];
+
+            return this;
+        },
+
+        /*
+         *  Add a view
+         */
+        addView: function(view, options) {
+            view._grid = this;
+            view._gridOptions = _.defaults(options || {}, {
+                width: null
+            });
+
+            this.views.push(view);
+            this.update();
+
+            return view;
+        },
+
+        /*
+         *  Remove a view
+         */
+        removeView: function(view) {
+            if (!_.isString(view)) view = view.cid;
+
+            this.views = _.filter(this.views, function(_v) {
+                return _v.cid != view;
+            });
+            this.update();
+        },
+
+        /*
+         *  Change layout by defining 
+         */
+        setLayout: function(n) {
+            this.columns = n;
+            this.update();
+        },
+
+        /*
+         *  Return current layout
+         */
+        getLayout: function() {
+            var layout = this.columns || Math.floor(Math.sqrt(this.views.length));
+
+            var nColumns = Math.min(layout, this.views.length);
+            var nLines = Math.ceil(this.views.length/layout);
+
+            return {
+                'columns': nColumns,
+                'lines': nLines
+            };
+        },
+
+        /*
+         *  Signal an update on tha layout to all views
+         */
+        signalLayout: function() {
+            _.each(this.views, function(view) {
+                view.trigger("grid:layout");
+            });
+        },
+
+        /*
+         *  Re-render the complete layout
+         */
+        render: function() {
+            var x, y, lineW;
+
+            // Detach view
+            _.each(this.views, function(view) {
+                view.detach();
+            });
+
+            // Clear the view
+            this.$el.empty();
+
+            // Calcul layout
+            var layout = this.getLayout();
+
+            var sectionWidth = (100/layout.columns).toFixed(3);
+            var sectionHeight = (100/layout.lines).toFixed(3);
+
+            // Add grid content
+            x = 0; y = 0; lineW = 100;
+
+            _.each(this.views, function(view, i) {
+                var $section, $content, w, dw;
+
+                // Calcul width for this section using optional width
+                dw =  (lineW/(layout.columns - x));
+                w = view._gridOptions.width || dw
+
+                w = w.toFixed(4);
+
+                // Container object
+                $section = $("<div>", {
+                    'class': 'grid-section',
+                    'css': {
+                        'left': (100 - lineW)+"%",
+                        'top': (y * sectionHeight)+"%",
+                        'width': w+"%",
+                        'height': sectionHeight+"%"
+                    }
+                });
+                $section.appendTo(this.$el);
+
+                lineW = lineW - w;
+
+                // Content
+                $content = $("<div>", {
+                    'class': 'grid-section-content'
+                });
+                $content.append(view.$el);
+                $content.appendTo($section);
+                view.trigger("grid:layout");
+
+                // Resize bar
+                if (x < (layout.columns - 1)) {
+                    // Horrizontal
+                    var hBar = $("<div>", {
+                        'class': "grid-resize-bar-h",
+                        'mousedown': this.resizerHandler(x, y, "h")
+                    });
+                    hBar.appendTo($section);
+                    $content.addClass("with-bar-h");
+                }
+
+                if (y < (layout.lines - 1)) {
+                    // Vertical
+                    var vBar = $("<div>", {
+                        'class': "grid-resize-bar-v",
+                        'mousedown': this.resizerHandler(x, y, "v")
+                    });
+                    vBar.appendTo($section);
+                    $content.addClass("with-bar-v");
+                }
+
+                // Calcul next position
+                x = x + 1;
+                if (x >= layout.columns) {
+                    x = 0;
+                    y = y + 1;
+                    lineW = 100;
+                }
+            }, this);
+
+            return this.ready();
+        },
+
+        // Create a resizer handler
+        resizerHandler: function(x, y, type) {
+            var that = this;
+            var $document = $(document);
+            var oX, oY, dX, dY;
+            return function(e) {
+                e.preventDefault();
+                oX = e.pageX;
+                oY = e.pageY;
+
+                dnd.cursor.set(type == "h" ? "col-resize" : "row-resize");
+
+                var f = function(e) {
+                    dx = oX - e.pageX;
+                    dy = oY - e.pageY;
+
+                    if (type == "h") {
+                        that.resizeColumn(x, -dx);
+                    } else {
+                        that.resizeLine(y, -dy);
+                    }
+
+                    oX = e.pageX;
+                    oY = e.pageY;
+                };
+
+                $document.mousemove(f);
+                $document.mouseup(function(e) {
+                    $document.unbind('mousemove', f);
+                    dnd.cursor.reset();
+                });
+            };
+        },
+
+        getSection: function(sx, sy) {
+            var x, y, layout = this.getLayout(), that = this;
+
+            x = 0; y = 0;
+            return this.$("> .grid-section").filter(function() {
+                var r = false;
+
+                if ((sx !== null && sx == x)
+                || (sy !== null && sy == y)) {
+                    r = true;
+                }
+
+                // Calcul next position
+                x = x + 1;
+                if (x >= layout.columns) {
+                    x = 0;
+                    y = y + 1;
+                }
+
+                return r;
+            });
+        },
+
+        _resize: function(type, i, d) {
+            var getSection = _.bind(_.partialRight(this.getSection, null), this);
+            var pixelToPercent = _.bind(_.partialRight(this.pixelToPercent, null), this);
+            var position = "left";
+            var size = "width";
+
+            if (type == "h") {
+                getSection = _.bind(_.partial(this.getSection, null), this);
+                pixelToPercent = _.bind(_.partial(this.pixelToPercent, null), this);
+                position = "top";
+                size = "height";
+            }
+
+            // Convert update to percent
+            d = pixelToPercent(d);
+
+            var $sections = getSection(i);
+            var $sectionsAfter = getSection(i+1);
+
+            // New size for next sections
+            // We use el.get(0).style and not el.css because el.css returns pixel and not the real value
+            var sAfterN = this.strToPercent($sectionsAfter.get(0).style[size])-d;
+
+            // New size for current sections
+            var sCurrentN = this.strToPercent($sections.get(0).style[size])+d;
+
+            // Limited size
+            if (sCurrentN < 10 || sAfterN < 10) return false;
+
+            // Resize next line
+            $sectionsAfter.css(_.object(
+                [position, size],
+                [
+                    (this.strToPercent($sectionsAfter.get(0).style[position])+d).toFixed(2)+"%",
+                    sAfterN.toFixed(2)+"%"
+                ]
+            ));
+
+            // Resize current line
+            $sections.css(_.object(
+                [size],
+                [sCurrentN.toFixed(2)+"%"]
+            ));
+
+            this.signalLayout();
+
+            return true;
+        },
+
+        resizeLine: function(i, d) {
+            return this._resize("h", i, d);
+        },
+
+        resizeColumn: function(i, d) {
+            return this._resize("w", i, d);
+        },
+
+        pixelToPercent: function(x, y) {
+            if (x !== null) return ((x*100) / this.$el.width());
+            if (y !== null) return ((y*100) / this.$el.height());
+        },
+
+        strToPercent: function(size) {
+            return parseFloat(size.replace("%", ""))
+        }
+    });
+
+    return GridView;
 });
 /**
  * @license RequireJS text 1.0.0 Copyright (c) 2010-2011, The Dojo Foundation All Rights Reserved.
@@ -23995,17 +24545,86 @@ define('platform/infos',[
     });
 }());
 
-define('text!resources/templates/editor.html',[],function () { return '<div class="summary">\n\n</div>\n\n<div class="inner">\n\n</div>';});
+define('text!resources/templates/article.html',[],function () { return '<span class="title"><%- article.get("title") %></span>';});
 
+define('views/summary',[
+    "hr/hr",
+    "text!resources/templates/article.html"
+], function(hr, templateFile) {
+
+    var ArticleItem = hr.List.Item.extend({
+        className: "article",
+        template: templateFile,
+        events: {
+            
+        },
+
+        templateContext: function() {
+            return {
+                'article': this.model
+            };
+        }
+    });
+
+    var ArticlesView = hr.List.extend({
+        className: "articles",
+        Collection: hr.Collection,
+        Item: ArticleItem
+    });
+
+
+    var Summary = hr.View.extend({
+        className: "summary",
+
+        initialize: function() {
+            Summary.__super__.initialize.apply(this, arguments);
+
+            this.articles = new ArticlesView({}, this);
+            this.articles.appendTo(this);
+
+            this.articles.collection.reset([
+            {
+                title: "Test"
+            },
+            {
+                title: "Test 2"
+            }
+            ])
+        }
+    });
+
+    return Summary;
+});
 define('views/editor',[
     "hr/hr",
-    "text!resources/templates/editor.html"
-], function(hr, templateFile) {
+    "views/grid",
+    "views/summary"
+], function(hr, Grid, Summary) {
     var Editor = hr.View.extend({
         className: "editor",
-        template: templateFile,
         defaults: {
             fs: null
+        },
+
+        initialize: function() {
+            Editor.__super__.initialize.apply(this, arguments);
+
+            this.fs = this.options.fs;
+
+            this.grid = new Grid({
+                columns: 3
+            }, this);
+            this.grid.appendTo(this);
+
+            // Summary
+            this.summary = new Summary(this);
+            this.grid.addView(this.summary, {width: 20});
+
+            // Editor
+            this.grid.addView(new hr.View({}, this));
+
+            // preview
+            this.grid.addView(new hr.View({}, this));
         }
     });
 
@@ -24044,7 +24663,6 @@ require([
             Application.__super__.initialize.apply(this, arguments);
 
             this.editor = null;
-            return this;
         },
 
         templateContext: function() {
