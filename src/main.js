@@ -4,8 +4,9 @@ require([
     "hr/hr",
     "hr/args",
     "platform/infos",
+    "views/editor",
     "text!resources/templates/main.html"
-], function(_, $, hr, args, platform, templateFile) {
+], function(_, $, hr, args, platform, Editor, templateFile) {
     // Configure hr
     hr.configure(args);
 
@@ -20,11 +21,14 @@ require([
         metas: {},
         links: {},
         events: {
-            
+            "click .open-local": "onOpenLocal",
+            "change .local-file-selector": "onLocalSelectionChange"
         },
 
         initialize: function() {
             Application.__super__.initialize.apply(this, arguments);
+
+            this.editor = null;
             return this;
         },
 
@@ -36,6 +40,34 @@ require([
 
         finish: function() {
             return Application.__super__.finish.apply(this, arguments);
+        },
+
+        setEditor: function(editor) {
+            if (this.editor) {
+                this.editor.remove();
+            }
+            this.editor = editor;
+            this.editor.update();
+            this.editor.appendTo(this);
+        },
+
+        // Click to select a new local folder
+        onOpenLocal: function(e) {
+            e.preventDefault();
+
+            this.$(".local-file-selector").click();
+        },
+
+        // Local file selector change
+        onLocalSelectionChange: function(e) {
+            var path = this.$(".local-file-selector").val();
+            if (!path) return;
+
+            this.setEditor(new Editor({
+                fs: new platform.fs.local({
+                    base: path
+                })
+            }));
         }
     });
 

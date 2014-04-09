@@ -23545,7 +23545,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397056409335,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397057975969,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -23995,7 +23995,23 @@ define('platform/infos',[
     });
 }());
 
-define('text!resources/templates/main.html',[],function () { return '<div id="homepage">\n    <img src="static/images/icons/512w.png" class="logo"/>\n\n    <div class="actions">\n        <% if (hasLocalFs) { %>\n        <a href="#" class="btn btn-lg btn-default btn-block open-local">Open Local Repository</a>\n        <% } %>\n        <a href="#" class="btn btn-lg btn-default btn-block open-github">Open GitHub Repository</a>\n    </div>\n</div>';});
+define('text!resources/templates/editor.html',[],function () { return '<div class="summary">\n\n</div>\n\n<div class="inner">\n\n</div>';});
+
+define('views/editor',[
+    "hr/hr",
+    "text!resources/templates/editor.html"
+], function(hr, templateFile) {
+    var Editor = hr.View.extend({
+        className: "editor",
+        template: templateFile,
+        defaults: {
+            fs: null
+        }
+    });
+
+    return Editor;
+});
+define('text!resources/templates/main.html',[],function () { return '<div id="homepage">\n    <img src="static/images/icons/512w.png" class="logo"/>\n\n    <div class="actions">\n        <a href="#" class="btn btn-lg btn-default btn-block open-new">Create a new Book</a>\n        <hr>\n        <% if (hasLocalFs) { %>\n        <input type="file" class="hidden local-file-selector" nwdirectory />\n        <a href="#" class="btn btn-lg btn-default btn-block open-local">Open Local Repository</a>\n        <% } %>\n        <a href="#" class="btn btn-lg btn-default btn-block open-github">Open GitHub Repository</a>\n    </div>\n</div>';});
 
 require([
     "hr/utils",
@@ -24003,8 +24019,9 @@ require([
     "hr/hr",
     "hr/args",
     "platform/infos",
+    "views/editor",
     "text!resources/templates/main.html"
-], function(_, $, hr, args, platform, templateFile) {
+], function(_, $, hr, args, platform, Editor, templateFile) {
     // Configure hr
     hr.configure(args);
 
@@ -24019,11 +24036,14 @@ require([
         metas: {},
         links: {},
         events: {
-            
+            "click .open-local": "onOpenLocal",
+            "change .local-file-selector": "onLocalSelectionChange"
         },
 
         initialize: function() {
             Application.__super__.initialize.apply(this, arguments);
+
+            this.editor = null;
             return this;
         },
 
@@ -24035,6 +24055,34 @@ require([
 
         finish: function() {
             return Application.__super__.finish.apply(this, arguments);
+        },
+
+        setEditor: function(editor) {
+            if (this.editor) {
+                this.editor.remove();
+            }
+            this.editor = editor;
+            this.editor.update();
+            this.editor.appendTo(this);
+        },
+
+        // Click to select a new local folder
+        onOpenLocal: function(e) {
+            e.preventDefault();
+
+            this.$(".local-file-selector").click();
+        },
+
+        // Local file selector change
+        onLocalSelectionChange: function(e) {
+            var path = this.$(".local-file-selector").val();
+            if (!path) return;
+
+            this.setEditor(new Editor({
+                fs: new platform.fs.local({
+                    base: path
+                })
+            }));
         }
     });
 
