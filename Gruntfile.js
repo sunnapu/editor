@@ -1,3 +1,6 @@
+var path = require("path");
+var _ = require("lodash");
+
 module.exports = function (grunt) {
     // Path to the client src
     var srcPath = path.resolve(__dirname, "src");
@@ -24,6 +27,7 @@ module.exports = function (grunt) {
 
         // Static files mappage
         "static": {
+            "fonts": path.resolve(srcPath, "resources", "fonts"),
             "images": path.resolve(srcPath, "resources", "images")
         },
 
@@ -63,7 +67,11 @@ module.exports = function (grunt) {
 
     // Build
     grunt.registerTask('build', [
-        'hr'
+        'hr:node'
+    ]);
+
+    grunt.registerTask('build-chrome', [
+        'hr:chrome'
     ]);
 
     grunt.registerTask('default', [

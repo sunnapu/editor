@@ -2,6 +2,17 @@
     "name": "gitbook-editor",
     "version": "0.0.0",
     "description": "Editor for writing GitBook",
+    "main": "build/index.html",
+    "window": {
+        "title": "Codebox",
+        "width": 1000,
+        "height": 600,
+        "icon": "build/static/images/icons/128.png",
+        "position": "center",
+        "show": true,
+        "toolbar": true,
+        "frame": true
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/GitbookIO/editor.git"
@@ -10,6 +21,7 @@
     "license": "Apache 2",
     "dependencies": {},
     "devDependencies": {
+        "lodash": "2.4.1",
         "hr.js": "0.6.4",
         "grunt": "~0.4.1",
         "grunt-contrib-clean": "~0.5.0"

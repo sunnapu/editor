@@ -3,8 +3,9 @@ require([
     "hr/dom",
     "hr/hr",
     "hr/args",
+    "platform/infos",
     "text!resources/templates/main.html"
-], function(_, $, hr, args, platform, update, account, stacks, ProjectsView, templateFile) {
+], function(_, $, hr, args, platform, templateFile) {
     // Configure hr
     hr.configure(args);
 
@@ -29,7 +30,7 @@ require([
 
         templateContext: function() {
             return {
-                
+                hasLocalFs: platform.fs.local != null
             };
         },
 
