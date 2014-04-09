@@ -1,0 +1,20 @@
+{
+    "name": "gitbook-editor",
+    "version": "0.0.0",
+    "description": "Editor for writing GitBook",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/GitbookIO/editor.git"
+    },
+    "author": "Samy Pesse <samypesse@gmail.com>",
+    "license": "Apache 2",
+    "dependencies": {},
+    "devDependencies": {
+        "hr.js": "0.6.4",
+        "grunt": "~0.4.1",
+        "grunt-contrib-clean": "~0.5.0"
+    },
+    "peerDependencies": {
+        "grunt": "~0.4.1"
+    }
+}
