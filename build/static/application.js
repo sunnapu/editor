@@ -23545,7 +23545,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397118428594,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397122566866,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -23617,7 +23617,7 @@ define('core/fs/base',[
 
     return Fs;
 });
-define('platform/fs',[
+define('core/fs/local',[
     "hr/hr",
     "hr/promise",
     "hr/utils",
@@ -23707,15 +23707,11 @@ define('platform/fs',[
 
     return LocalFs;
 });
-define('platform/infos',[
-    "platform/fs"
+define('core/fs/all',[
+    "core/fs/local"
 ], function(LocalFs) {
-
     return {
-        name: "Desktop",
-        fs: {
-            local: LocalFs
-        }
+        local: LocalFs
     };
 });
 define('utils/dragdrop',[
@@ -24547,7 +24543,7 @@ define('views/grid',[
 
 define('text!resources/templates/article.html',[],function () { return '<span class="title"><%- article.get("title") %></span>';});
 
-define('views/summary',[
+define('views/articles',[
     "hr/hr",
     "text!resources/templates/article.html"
 ], function(hr, templateFile) {
@@ -24579,15 +24575,23 @@ define('views/summary',[
         Item: ArticleItem
     });
 
+    return ArticlesView;
+});
+define('text!resources/templates/summary.html',[],function () { return '<h1>Summary</h1>\n\n<div class="inner"></div>';});
 
+define('views/summary',[
+    "hr/hr",
+    "views/articles",
+    "text!resources/templates/summary.html"
+], function(hr, ArticlesView, templateFile) {
     var Summary = hr.View.extend({
         className: "summary",
+        template: templateFile,
 
         initialize: function() {
             Summary.__super__.initialize.apply(this, arguments);
 
             this.articles = new ArticlesView({}, this);
-            this.articles.appendTo(this);
 
             this.articles.collection.reset([
                 {
@@ -24599,6 +24603,13 @@ define('views/summary',[
             ]);
 
             this.load();
+            this.update();
+        },
+
+        finish: function() {
+            console.log("after");
+            this.articles.$el.appendTo(this.$(".inner"));
+            return Summary.__super__.finish.apply(this, arguments);
         },
 
         /*
@@ -24701,17 +24712,17 @@ define('views/book',[
 
     return Book;
 });
-define('text!resources/templates/main.html',[],function () { return '<div id="homepage">\n    <img src="static/images/icons/512.png" class="logo"/>\n\n    <div class="actions">\n        <a href="#" class="btn btn-lg btn-default btn-block open-new">Create a new Book</a>\n        <hr>\n        <% if (hasLocalFs) { %>\n        <input type="file" class="hidden local-file-selector" nwdirectory />\n        <a href="#" class="btn btn-lg btn-default btn-block open-local">Open Local Repository</a>\n        <% } %>\n        <a href="#" class="btn btn-lg btn-default btn-block open-github">Open GitHub Repository</a>\n    </div>\n</div>';});
+define('text!resources/templates/main.html',[],function () { return '<div id="homepage">\n    <img src="static/images/icons/512.png" class="logo"/>\n\n    <div class="actions">\n        <a href="#" class="btn btn-lg btn-default btn-block open-new">Create a new Book</a>\n        <hr>\n        <input type="file" class="hidden local-file-selector" nwdirectory />\n        <a href="#" class="btn btn-lg btn-default btn-block open-local">Open Local Repository</a>\n        <a href="#" class="btn btn-lg btn-default btn-block open-github">Open GitHub Repository</a>\n    </div>\n</div>';});
 
 require([
     "hr/utils",
     "hr/dom",
     "hr/hr",
     "hr/args",
-    "platform/infos",
+    "core/fs/all",
     "views/book",
     "text!resources/templates/main.html"
-], function(_, $, hr, args, platform, Book, templateFile) {
+], function(_, $, hr, args, fs, Book, templateFile) {
     // Configure hr
     hr.configure(args);
 
@@ -24734,12 +24745,6 @@ require([
             Application.__super__.initialize.apply(this, arguments);
 
             this.editor = null;
-        },
-
-        templateContext: function() {
-            return {
-                hasLocalFs: platform.fs.local != null
-            };
         },
 
         finish: function() {
@@ -24768,7 +24773,7 @@ require([
             if (!path) return;
 
             this.setBook(new Book({
-                fs: new platform.fs.local({
+                fs: new fs.local({
                     base: path
                 })
             }));

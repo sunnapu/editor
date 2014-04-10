@@ -1,44 +1,16 @@
 define([
     "hr/hr",
-    "text!resources/templates/article.html"
-], function(hr, templateFile) {
-
-    var ArticleItem = hr.List.Item.extend({
-        className: "article",
-        template: templateFile,
-        events: {
-            "click": "open"
-        },
-
-        templateContext: function() {
-            return {
-                'article': this.model
-            };
-        },
-
-        open: function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            this.parent.parent.parent.openEditor(this);
-        }
-    });
-
-    var ArticlesView = hr.List.extend({
-        className: "articles",
-        Collection: hr.Collection,
-        Item: ArticleItem
-    });
-
-
+    "views/articles",
+    "text!resources/templates/summary.html"
+], function(hr, ArticlesView, templateFile) {
     var Summary = hr.View.extend({
         className: "summary",
+        template: templateFile,
 
         initialize: function() {
             Summary.__super__.initialize.apply(this, arguments);
 
             this.articles = new ArticlesView({}, this);
-            this.articles.appendTo(this);
 
             this.articles.collection.reset([
                 {
@@ -50,6 +22,13 @@ define([
             ]);
 
             this.load();
+            this.update();
+        },
+
+        finish: function() {
+            console.log("after");
+            this.articles.$el.appendTo(this.$(".inner"));
+            return Summary.__super__.finish.apply(this, arguments);
         },
 
         /*

@@ -3,10 +3,10 @@ require([
     "hr/dom",
     "hr/hr",
     "hr/args",
-    "platform/infos",
+    "core/fs/all",
     "views/book",
     "text!resources/templates/main.html"
-], function(_, $, hr, args, platform, Book, templateFile) {
+], function(_, $, hr, args, fs, Book, templateFile) {
     // Configure hr
     hr.configure(args);
 
@@ -29,12 +29,6 @@ require([
             Application.__super__.initialize.apply(this, arguments);
 
             this.editor = null;
-        },
-
-        templateContext: function() {
-            return {
-                hasLocalFs: platform.fs.local != null
-            };
         },
 
         finish: function() {
@@ -63,7 +57,7 @@ require([
             if (!path) return;
 
             this.setBook(new Book({
-                fs: new platform.fs.local({
+                fs: new fs.local({
                     base: path
                 })
             }));

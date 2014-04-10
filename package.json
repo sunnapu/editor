@@ -5,7 +5,7 @@
     "main": "build/index.html",
     "window": {
         "title": "Codebox",
-        "width": 1000,
+        "width": 1200,
         "height": 600,
         "icon": "build/static/images/icons/128.png",
         "position": "center",

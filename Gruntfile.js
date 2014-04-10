@@ -9,56 +9,44 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('hr.js');
     grunt.loadNpmTasks('grunt-contrib-clean');
 
-    var hrConfig = {
-        // Base directory for the application
-        "base": srcPath,
-
-        // Application name
-        "name": "Codebox",
-
-        // Mode debug
-        "debug": true,
-
-        // Main entry point for application
-        "main": "main",
-
-        // Build output directory
-        "build": path.resolve(__dirname, "build"),
-
-        // Static files mappage
-        "static": {
-            "fonts": path.resolve(srcPath, "resources", "fonts"),
-            "images": path.resolve(srcPath, "resources", "images")
-        },
-
-        // Stylesheet entry point
-        "style": path.resolve(srcPath, "resources/stylesheets/main.less"),
-
-        // Modules paths
-        'paths': {
-            "platform": "platforms/chrome",
-        },
-        "shim": {},
-        'args': {},
-        'options': {}
-    };
-
     // Init GRUNT configuraton
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         hr: {
-            node: _.extend({}, hrConfig, {
-                'index': grunt.file.read(path.resolve(srcPath, "platforms/node/index.html")),
-                'paths': {
-                    "platform": "platforms/node"
-                }
-            }),
-            chrome: _.extend({}, hrConfig, {
-                'index': grunt.file.read(path.resolve(srcPath, "platforms/chrome/index.html")),
-                'paths': {
-                    "platform": "platforms/chrome"
-                }
-            })
+            app: {
+                // Base directory for the application
+                "base": srcPath,
+
+                // Application name
+                "name": "Codebox",
+
+                // Mode debug
+                "debug": true,
+
+                // Main entry point for application
+                "main": "main",
+
+                // HTML entry point
+                'index': grunt.file.read(path.resolve(srcPath, "index.html")),
+
+                // Build output directory
+                "build": path.resolve(__dirname, "build"),
+
+                // Static files mappage
+                "static": {
+                    "fonts": path.resolve(srcPath, "resources", "fonts"),
+                    "images": path.resolve(srcPath, "resources", "images")
+                },
+
+                // Stylesheet entry point
+                "style": path.resolve(srcPath, "resources/stylesheets/main.less"),
+
+                // Modules paths
+                'paths': {},
+                "shim": {},
+                'args': {},
+                'options': {}
+            }
         },
         clean: {
             build: ['build/']
@@ -67,12 +55,9 @@ module.exports = function (grunt) {
 
     // Build
     grunt.registerTask('build', [
-        'hr:node'
+        'hr:app'
     ]);
 
-    grunt.registerTask('build-chrome', [
-        'hr:chrome'
-    ]);
 
     grunt.registerTask('default', [
         'build'
