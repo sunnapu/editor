@@ -25562,7 +25562,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397173573617,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397173671555,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -44839,7 +44839,6 @@ define('views/preview',[
                 });
             })
             .then(function(sections) {
-                console.log(sections);
                 that.sections = sections;
                 that.update();
             });

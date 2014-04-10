@@ -45,7 +45,6 @@ define([
                 });
             })
             .then(function(sections) {
-                console.log(sections);
                 that.sections = sections;
                 that.update();
             });
