@@ -8,13 +8,18 @@ define([
         className: "article",
         template: templateFile,
         events: {
-            "click": "open"
+            "click": "open",
+            "dblclick": "toggleEdit",
+
+            "change > input": "onChangeTitle",
+            "keyup > input": "onKeyUp",
+            "click > input": function(e) { e.stopPropagation(); }
         },
 
         initialize: function() {
             ArticleItem.__super__.initialize.apply(this, arguments);
 
-            this.articles = new ArticlesView({}, this.parent.parent);
+            this.articles = new ArticlesView({}, this.list);
         },
 
         render: function() {
@@ -37,7 +42,25 @@ define([
             e.preventDefault();
             e.stopPropagation();
 
-            this.parent.parent.parent.openEditor(this);
+            this.list.parent.parent.openArticle(this);
+        },
+
+        toggleEdit: function(e) {
+            if (typeof e != "boolean") {
+                e.preventDefault();
+                e.stopPropagation();
+                e = null;
+            }
+            this.$el.toggleClass("mode-edit", e);
+        },
+
+        onChangeTitle: function() {
+            this.toggleEdit(false);
+            this.model.set("title", this.$("> input").val());
+        },
+
+        onKeyUp: function(e) {
+            if (e.which == 13) this.toggleEdit(false);
         }
     });
 

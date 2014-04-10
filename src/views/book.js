@@ -38,10 +38,10 @@ define([
         },
 
         /*
-         *  Open an editor for an article
+         * Show an article
          */
-        openEditor: function(article) {
-
+        openArticle: function(article) {
+            
         }
     });
 

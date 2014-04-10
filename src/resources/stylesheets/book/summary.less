@@ -4,6 +4,7 @@
     h1 {
         margin: 0px;
         margin-bottom: 15px;
+        font-size: 20px;
     }
 
     .articles {
@@ -13,9 +14,29 @@
         list-style: none;
 
         .article {
+            position: relative;
+
             .title {
                 padding: 8px 10px;
                 display: block;
+            }
+
+            input {
+                display: none;
+                border: none;
+                .box-shadow(none);
+                padding: 8px 10px;
+                margin: 0px;
+                height: auto;
+            }
+
+            &.mode-edit {
+                > .title {
+                    display: none;
+                }
+                > input {
+                    display: block;
+                }
             }
 
             .chapter-articles {

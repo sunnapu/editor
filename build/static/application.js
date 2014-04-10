@@ -23545,7 +23545,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397126050009,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397161839630,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -24552,7 +24552,7 @@ define('collections/articles',[
     });
 }());
 
-define('text!resources/templates/article.html',[],function () { return '<span class="title"><%- article.get("title") %></span><div class="chapter-articles"></div>';});
+define('text!resources/templates/article.html',[],function () { return '<span class="title"><%- article.get("title") %></span>\n<input type="text" class="form-control" value="<%- article.get("title") %>" />\n<div class="chapter-articles"></div>';});
 
 define('views/articles',[
     "hr/hr",
@@ -24564,13 +24564,18 @@ define('views/articles',[
         className: "article",
         template: templateFile,
         events: {
-            "click": "open"
+            "click": "open",
+            "dblclick": "toggleEdit",
+
+            "change > input": "onChangeTitle",
+            "keyup > input": "onKeyUp",
+            "click > input": function(e) { e.stopPropagation(); }
         },
 
         initialize: function() {
             ArticleItem.__super__.initialize.apply(this, arguments);
 
-            this.articles = new ArticlesView({}, this.parent.parent);
+            this.articles = new ArticlesView({}, this.list);
         },
 
         render: function() {
@@ -24593,7 +24598,25 @@ define('views/articles',[
             e.preventDefault();
             e.stopPropagation();
 
-            this.parent.parent.parent.openEditor(this);
+            this.list.parent.parent.openArticle(this);
+        },
+
+        toggleEdit: function(e) {
+            if (typeof e != "boolean") {
+                e.preventDefault();
+                e.stopPropagation();
+                e = null;
+            }
+            this.$el.toggleClass("mode-edit", e);
+        },
+
+        onChangeTitle: function() {
+            this.toggleEdit(false);
+            this.model.set("title", this.$("> input").val());
+        },
+
+        onKeyUp: function(e) {
+            if (e.which == 13) this.toggleEdit(false);
         }
     });
 
@@ -42354,10 +42377,10 @@ define('views/book',[
         },
 
         /*
-         *  Open an editor for an article
+         * Show an article
          */
-        openEditor: function(article) {
-
+        openArticle: function(article) {
+            
         }
     });
 
