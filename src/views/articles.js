@@ -1,8 +1,9 @@
 define([
     "hr/hr",
+    "utils/dragdrop",
     "collections/articles",
     "text!resources/templates/article.html"
-], function(hr, Articles, templateFile) {
+], function(hr, dnd, Articles, templateFile) {
 
     var ArticleItem = hr.List.Item.extend({
         className: "article",
@@ -11,16 +12,48 @@ define([
             "click": "open",
             "dblclick": "toggleEdit",
 
+            "click .action-edit": "toggleEdit",
+            "click .action-add": "addChapter",
+
             "change > input": "onChangeTitle",
             "keyup > input": "onKeyUp",
             "click > input": function(e) { e.stopPropagation(); }
         },
 
         initialize: function() {
+            var that = this;
             ArticleItem.__super__.initialize.apply(this, arguments);
 
             this.articles = new ArticlesView({}, this.list.parent);
-            this.editor = this.list.parent.parent;
+            this.summary = this.list.parent;
+            this.editor = this.summary.parent;
+            
+
+            // Drop tabs to order
+            this.dropArea = new dnd.DropArea({
+                view: this,
+                dragType: this.summary.drag,
+                handler: function(article) {
+                    var i = that.collection.indexOf(that.model);
+                    var ib = that.collection.indexOf(article);
+
+                    if (ib >= 0 && ib < i) {
+                        i = i - 1;
+                    }
+                    article.collection.remove(article);
+                    that.collection.add(article, {
+                        at: i
+                    });
+                }
+            });
+
+            this.summary.drag.enableDrag({
+                view: this,
+                data: this.model,
+                start: function() {
+                    return !that.$el.hasClass("mode-edit");
+                }
+            });
         },
 
         render: function() {
@@ -62,6 +95,13 @@ define([
             }
         },
 
+        addChapter: function(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        },
+
         onChangeTitle: function() {
             this.toggleEdit(false);
             this.model.set("title", this.$("> input").val());
@@ -75,7 +115,14 @@ define([
     var ArticlesView = hr.List.extend({
         className: "articles",
         Collection: Articles,
-        Item: ArticleItem
+        Item: ArticleItem,
+
+        initialize: function() {
+            var that = this;
+            ArticlesView.__super__.initialize.apply(this, arguments);
+
+            this.summary = this.parent;
+        },
     });
 
     return ArticlesView;

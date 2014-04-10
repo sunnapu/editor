@@ -155,6 +155,7 @@ define([
                 if (e.type == 'mousedown' && e.originalEvent.button != 0) return;
                 if (!that.state) return;
                 e.preventDefault();
+                e.stopPropagation();
 
                 var dx, dy, hasMove = false;
 
@@ -174,11 +175,11 @@ define([
                 // Contrain element
                 var cw, ch, cx, cy;
 
+                if (options.start && options.start() === false) return;
+
                 that.drop = [];
                 if (options.baseDropArea) that.enterDropArea(options.baseDropArea);
                 that.data = data;
-
-                if (options.start) options.start();
 
                 var f = function(e) {
                     var _drop = that.getDrop();
@@ -190,8 +191,11 @@ define([
                         if (!hasMove) {
                             setCursor(options.cursor);
                             $el.addClass("move");
+                            that.trigger("drag:start");
                         }
                         hasMove = true;
+                    } else {
+                        return;
                     }
 
                     ex = poX - dx;
@@ -202,6 +206,8 @@ define([
                         ch = _drop.$el.height();
                         cx = _drop.$el.offset().left;
                         cy = _drop.$el.offset().top;
+
+                        console.log("constrain", cx, cy, cw, ch)
 
                         if (Math.abs(ey - cy) < 50) ey = cy;
                         if (Math.abs((ey + eh) - (cy+ch)) < 50) ey = cy + ch - eh;
@@ -228,6 +234,8 @@ define([
                         }
                         that.trigger("drop", _drop, that.data);
                     }
+
+                    that.trigger("drag:end");
 
                     that.data = null;
                     that.drop = [];

@@ -23545,7 +23545,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397162270688,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397167204153,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -23818,6 +23818,7 @@ define('utils/dragdrop',[
                 if (e.type == 'mousedown' && e.originalEvent.button != 0) return;
                 if (!that.state) return;
                 e.preventDefault();
+                e.stopPropagation();
 
                 var dx, dy, hasMove = false;
 
@@ -23837,11 +23838,11 @@ define('utils/dragdrop',[
                 // Contrain element
                 var cw, ch, cx, cy;
 
+                if (options.start && options.start() === false) return;
+
                 that.drop = [];
                 if (options.baseDropArea) that.enterDropArea(options.baseDropArea);
                 that.data = data;
-
-                if (options.start) options.start();
 
                 var f = function(e) {
                     var _drop = that.getDrop();
@@ -23853,8 +23854,11 @@ define('utils/dragdrop',[
                         if (!hasMove) {
                             setCursor(options.cursor);
                             $el.addClass("move");
+                            that.trigger("drag:start");
                         }
                         hasMove = true;
+                    } else {
+                        return;
                     }
 
                     ex = poX - dx;
@@ -23865,6 +23869,8 @@ define('utils/dragdrop',[
                         ch = _drop.$el.height();
                         cx = _drop.$el.offset().left;
                         cy = _drop.$el.offset().top;
+
+                        console.log("constrain", cx, cy, cw, ch)
 
                         if (Math.abs(ey - cy) < 50) ey = cy;
                         if (Math.abs((ey + eh) - (cy+ch)) < 50) ey = cy + ch - eh;
@@ -23891,6 +23897,8 @@ define('utils/dragdrop',[
                         }
                         that.trigger("drop", _drop, that.data);
                     }
+
+                    that.trigger("drag:end");
 
                     that.data = null;
                     that.drop = [];
@@ -24552,13 +24560,14 @@ define('collections/articles',[
     });
 }());
 
-define('text!resources/templates/article.html',[],function () { return '<span class="title"><%- article.get("title") %></span>\n<input type="text" class="form-control" value="<%- article.get("title") %>" />\n<div class="chapter-articles"></div>';});
+define('text!resources/templates/article.html',[],function () { return '<div class="chapter-actions">\n    <a href="#" class="action action-edit"><i class="fa fa-pencil"></i></a>\n    <% if (article.get("level").length == 1) { %>\n    <a href="#" class="action action-add"><i class="fa fa-plus-square"></i></a>\n    <% } %>\n</div>\n<span class="chapter-title"><%- article.get("title") %></span>\n<input type="text" class="form-control" value="<%- article.get("title") %>" />\n<div class="chapter-articles"></div>';});
 
 define('views/articles',[
     "hr/hr",
+    "utils/dragdrop",
     "collections/articles",
     "text!resources/templates/article.html"
-], function(hr, Articles, templateFile) {
+], function(hr, dnd, Articles, templateFile) {
 
     var ArticleItem = hr.List.Item.extend({
         className: "article",
@@ -24567,16 +24576,48 @@ define('views/articles',[
             "click": "open",
             "dblclick": "toggleEdit",
 
+            "click .action-edit": "toggleEdit",
+            "click .action-add": "addChapter",
+
             "change > input": "onChangeTitle",
             "keyup > input": "onKeyUp",
             "click > input": function(e) { e.stopPropagation(); }
         },
 
         initialize: function() {
+            var that = this;
             ArticleItem.__super__.initialize.apply(this, arguments);
 
             this.articles = new ArticlesView({}, this.list.parent);
-            this.editor = this.list.parent.parent;
+            this.summary = this.list.parent;
+            this.editor = this.summary.parent;
+            
+
+            // Drop tabs to order
+            this.dropArea = new dnd.DropArea({
+                view: this,
+                dragType: this.summary.drag,
+                handler: function(article) {
+                    var i = that.collection.indexOf(that.model);
+                    var ib = that.collection.indexOf(article);
+
+                    if (ib >= 0 && ib < i) {
+                        i = i - 1;
+                    }
+                    article.collection.remove(article);
+                    that.collection.add(article, {
+                        at: i
+                    });
+                }
+            });
+
+            this.summary.drag.enableDrag({
+                view: this,
+                data: this.model,
+                start: function() {
+                    return !that.$el.hasClass("mode-edit");
+                }
+            });
         },
 
         render: function() {
@@ -24618,6 +24659,13 @@ define('views/articles',[
             }
         },
 
+        addChapter: function(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        },
+
         onChangeTitle: function() {
             this.toggleEdit(false);
             this.model.set("title", this.$("> input").val());
@@ -24631,7 +24679,14 @@ define('views/articles',[
     var ArticlesView = hr.List.extend({
         className: "articles",
         Collection: Articles,
-        Item: ArticleItem
+        Item: ArticleItem,
+
+        initialize: function() {
+            var that = this;
+            ArticlesView.__super__.initialize.apply(this, arguments);
+
+            this.summary = this.parent;
+        },
     });
 
     return ArticlesView;
@@ -24640,9 +24695,31 @@ define('text!resources/templates/summary.html',[],function () { return '<h1>Summ
 
 define('views/summary',[
     "hr/hr",
+    "utils/dragdrop",
     "views/articles",
     "text!resources/templates/summary.html"
-], function(hr, ArticlesView, templateFile) {
+], function(hr, dnd, ArticlesView, templateFile) {
+    var SummaryTrash = hr.View.extend({
+        className: "trash",
+        initialize: function() {
+            SummaryTrash.__super__.initialize.apply(this, arguments);
+
+            this.summary = this.parent;
+
+            this.$el.hide();
+            this.$el.html('<i class="fa fa-trash-o"></i> Remove');
+
+            // Drop tabs to order
+            this.dropArea = new dnd.DropArea({
+                view: this,
+                dragType: this.summary.drag,
+                handler: function(article) {
+                    article.destroy();
+                }
+            });
+        },
+    })
+
     var Summary = hr.View.extend({
         className: "summary",
         template: templateFile,
@@ -24650,22 +24727,27 @@ define('views/summary',[
         initialize: function() {
             Summary.__super__.initialize.apply(this, arguments);
 
-            this.articles = new ArticlesView({}, this);
+            // Drag and drop of tabs
+            this.drag = new dnd.DraggableType();
+            this.listenTo(this.drag, "drag:start", function() {
+                this.trash.$el.show();
+            });
+            this.listenTo(this.drag, "drag:end", function() {
+                this.trash.$el.hide();
+            });
 
-            this.articles.collection.reset([
-                {
-                    title: "Test"
-                },
-                {
-                    title: "Test 2"
-                }
-            ]);
+            // Trash
+            this.trash = new SummaryTrash({}, this);
+            
+
+            this.articles = new ArticlesView({}, this);
 
             this.load();
         },
 
         finish: function() {
             this.articles.$el.appendTo(this.$(".inner"));
+            this.trash.$el.appendTo(this.$el);
             return Summary.__super__.finish.apply(this, arguments);
         },
 

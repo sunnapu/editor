@@ -1,8 +1,30 @@
 define([
     "hr/hr",
+    "utils/dragdrop",
     "views/articles",
     "text!resources/templates/summary.html"
-], function(hr, ArticlesView, templateFile) {
+], function(hr, dnd, ArticlesView, templateFile) {
+    var SummaryTrash = hr.View.extend({
+        className: "trash",
+        initialize: function() {
+            SummaryTrash.__super__.initialize.apply(this, arguments);
+
+            this.summary = this.parent;
+
+            this.$el.hide();
+            this.$el.html('<i class="fa fa-trash-o"></i> Remove');
+
+            // Drop tabs to order
+            this.dropArea = new dnd.DropArea({
+                view: this,
+                dragType: this.summary.drag,
+                handler: function(article) {
+                    article.destroy();
+                }
+            });
+        },
+    })
+
     var Summary = hr.View.extend({
         className: "summary",
         template: templateFile,
@@ -10,22 +32,27 @@ define([
         initialize: function() {
             Summary.__super__.initialize.apply(this, arguments);
 
-            this.articles = new ArticlesView({}, this);
+            // Drag and drop of tabs
+            this.drag = new dnd.DraggableType();
+            this.listenTo(this.drag, "drag:start", function() {
+                this.trash.$el.show();
+            });
+            this.listenTo(this.drag, "drag:end", function() {
+                this.trash.$el.hide();
+            });
 
-            this.articles.collection.reset([
-                {
-                    title: "Test"
-                },
-                {
-                    title: "Test 2"
-                }
-            ]);
+            // Trash
+            this.trash = new SummaryTrash({}, this);
+            
+
+            this.articles = new ArticlesView({}, this);
 
             this.load();
         },
 
         finish: function() {
             this.articles.$el.appendTo(this.$(".inner"));
+            this.trash.$el.appendTo(this.$el);
             return Summary.__super__.finish.apply(this, arguments);
         },
 
