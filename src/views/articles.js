@@ -19,7 +19,8 @@ define([
         initialize: function() {
             ArticleItem.__super__.initialize.apply(this, arguments);
 
-            this.articles = new ArticlesView({}, this.list);
+            this.articles = new ArticlesView({}, this.list.parent);
+            this.editor = this.list.parent.parent;
         },
 
         render: function() {
@@ -42,16 +43,23 @@ define([
             e.preventDefault();
             e.stopPropagation();
 
-            this.list.parent.parent.openArticle(this);
+            this.editor.openArticle(this);
         },
 
         toggleEdit: function(e) {
+            var $input = this.$("> input");
             if (typeof e != "boolean") {
                 e.preventDefault();
                 e.stopPropagation();
                 e = null;
             }
+
             this.$el.toggleClass("mode-edit", e);
+            if (this.$el.hasClass("mode-edit")) {
+                $input.focus();
+            } else {
+                $input.blur();
+            }
         },
 
         onChangeTitle: function() {
