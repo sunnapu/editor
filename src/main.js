@@ -4,9 +4,9 @@ require([
     "hr/hr",
     "hr/args",
     "platform/infos",
-    "views/editor",
+    "views/book",
     "text!resources/templates/main.html"
-], function(_, $, hr, args, platform, Editor, templateFile) {
+], function(_, $, hr, args, platform, Book, templateFile) {
     // Configure hr
     hr.configure(args);
 
@@ -41,13 +41,13 @@ require([
             return Application.__super__.finish.apply(this, arguments);
         },
 
-        setEditor: function(editor) {
-            if (this.editor) {
-                this.editor.remove();
+        setBook: function(book) {
+            if (this.book) {
+                this.book.remove();
             }
-            this.editor = editor;
-            this.editor.update();
-            this.editor.appendTo(this);
+            this.book = book;
+            this.book.update();
+            this.book.appendTo(this);
         },
 
         // Click to select a new local folder
@@ -62,7 +62,7 @@ require([
             var path = this.$(".local-file-selector").val();
             if (!path) return;
 
-            this.setEditor(new Editor({
+            this.setBook(new Book({
                 fs: new platform.fs.local({
                     base: path
                 })

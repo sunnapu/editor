@@ -23545,7 +23545,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397059361452,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397118428594,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -24556,13 +24556,20 @@ define('views/summary',[
         className: "article",
         template: templateFile,
         events: {
-            
+            "click": "open"
         },
 
         templateContext: function() {
             return {
                 'article': this.model
             };
+        },
+
+        open: function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            this.parent.parent.parent.openEditor(this);
         }
     });
 
@@ -24583,13 +24590,34 @@ define('views/summary',[
             this.articles.appendTo(this);
 
             this.articles.collection.reset([
-            {
-                title: "Test"
-            },
-            {
-                title: "Test 2"
-            }
-            ])
+                {
+                    title: "Test"
+                },
+                {
+                    title: "Test 2"
+                }
+            ]);
+
+            this.load();
+        },
+
+        /*
+         * Load summary from SUMMARY.md
+         */
+        load: function() {
+            var that = this;
+
+            this.parent.fs.read("SUMMARY.md")
+            .then(function(content) {
+                that.articles.collection.parseSummary(content);
+            });
+        },
+
+        /*
+         * Save summary content
+         */
+        save: function() {
+            return this.parent.fs.write("SUMMARY.md", this.articles.collection.toMarkdown());
         }
     });
 
@@ -24597,17 +24625,53 @@ define('views/summary',[
 });
 define('views/editor',[
     "hr/hr",
-    "views/grid",
-    "views/summary"
-], function(hr, Grid, Summary) {
+    "hr/dom"
+], function(hr, $) {
     var Editor = hr.View.extend({
         className: "editor",
+
+        initialize: function() {
+            Editor.__super__.initialize.apply(this, arguments);
+
+            this.$inner = $("<div>", {'class': "inner"});
+            this.$inner.appendTo(this.$el);
+        }
+    });
+
+    return Editor;
+});
+define('views/preview',[
+    "hr/hr",
+    "hr/dom"
+], function(hr, $) {
+    var Preview = hr.View.extend({
+        className: "preview",
+
+        initialize: function() {
+            Preview.__super__.initialize.apply(this, arguments);
+
+            this.$inner = $("<div>", {'class': "inner"});
+            this.$inner.appendTo(this.$el);
+        }
+    });
+
+    return Preview;
+});
+define('views/book',[
+    "hr/hr",
+    "views/grid",
+    "views/summary",
+    "views/editor",
+    "views/preview"
+], function(hr, Grid, Summary, Editor, Preview) {
+    var Book = hr.View.extend({
+        className: "book",
         defaults: {
             fs: null
         },
 
         initialize: function() {
-            Editor.__super__.initialize.apply(this, arguments);
+            Book.__super__.initialize.apply(this, arguments);
 
             this.fs = this.options.fs;
 
@@ -24617,20 +24681,27 @@ define('views/editor',[
             this.grid.appendTo(this);
 
             // Summary
-            this.summary = new Summary(this);
+            this.summary = new Summary({}, this);
             this.grid.addView(this.summary, {width: 20});
 
             // Editor
-            this.grid.addView(new hr.View({}, this));
+            this.grid.addView(new Editor({}, this));
 
             // preview
-            this.grid.addView(new hr.View({}, this));
+            this.grid.addView(new Preview({}, this));
+        },
+
+        /*
+         *  Open an editor for an article
+         */
+        openEditor: function(article) {
+
         }
     });
 
-    return Editor;
+    return Book;
 });
-define('text!resources/templates/main.html',[],function () { return '<div id="homepage">\n    <img src="static/images/icons/512w.png" class="logo"/>\n\n    <div class="actions">\n        <a href="#" class="btn btn-lg btn-default btn-block open-new">Create a new Book</a>\n        <hr>\n        <% if (hasLocalFs) { %>\n        <input type="file" class="hidden local-file-selector" nwdirectory />\n        <a href="#" class="btn btn-lg btn-default btn-block open-local">Open Local Repository</a>\n        <% } %>\n        <a href="#" class="btn btn-lg btn-default btn-block open-github">Open GitHub Repository</a>\n    </div>\n</div>';});
+define('text!resources/templates/main.html',[],function () { return '<div id="homepage">\n    <img src="static/images/icons/512.png" class="logo"/>\n\n    <div class="actions">\n        <a href="#" class="btn btn-lg btn-default btn-block open-new">Create a new Book</a>\n        <hr>\n        <% if (hasLocalFs) { %>\n        <input type="file" class="hidden local-file-selector" nwdirectory />\n        <a href="#" class="btn btn-lg btn-default btn-block open-local">Open Local Repository</a>\n        <% } %>\n        <a href="#" class="btn btn-lg btn-default btn-block open-github">Open GitHub Repository</a>\n    </div>\n</div>';});
 
 require([
     "hr/utils",
@@ -24638,9 +24709,9 @@ require([
     "hr/hr",
     "hr/args",
     "platform/infos",
-    "views/editor",
+    "views/book",
     "text!resources/templates/main.html"
-], function(_, $, hr, args, platform, Editor, templateFile) {
+], function(_, $, hr, args, platform, Book, templateFile) {
     // Configure hr
     hr.configure(args);
 
@@ -24675,13 +24746,13 @@ require([
             return Application.__super__.finish.apply(this, arguments);
         },
 
-        setEditor: function(editor) {
-            if (this.editor) {
-                this.editor.remove();
+        setBook: function(book) {
+            if (this.book) {
+                this.book.remove();
             }
-            this.editor = editor;
-            this.editor.update();
-            this.editor.appendTo(this);
+            this.book = book;
+            this.book.update();
+            this.book.appendTo(this);
         },
 
         // Click to select a new local folder
@@ -24696,7 +24767,7 @@ require([
             var path = this.$(".local-file-selector").val();
             if (!path) return;
 
-            this.setEditor(new Editor({
+            this.setBook(new Book({
                 fs: new platform.fs.local({
                     base: path
                 })
