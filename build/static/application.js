@@ -25562,7 +25562,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397173671555,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397174039199,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -44768,13 +44768,22 @@ define('views/editor',[
             this.$inner = $("<div>", {'class': "inner"});
             this.$inner.appendTo(this.$el);
 
+            this.ignoreChange = false;
+
             this.editor = ace.edit(this.$inner.get(0));
+
+            this.editor.on("change", function() {
+                if (this.ignoreChange || !this.book.currentArticle) return;
+
+                var content = this.editor.getValue();
+                this.book.writeArticle(this.book.currentArticle, content);
+            }.bind(this));
 
             this.editor.setTheme("ace/theme/chrome");
             this.editor.getSession().setMode("ace/mode/markdown");
             this.editor.setShowPrintMargin(false);
 
-            this.listenTo(this.book, "open", this.onArticleChange);
+            this.listenTo(this.book, "article:open", this.onArticleChange);
         },
 
         onArticleChange: function(article) {
@@ -44782,8 +44791,10 @@ define('views/editor',[
 
             this.book.readArticle(article)
             .then(function(content) {
+                that.ignoreChange = true;
                 that.editor.setValue(content);
                 that.editor.gotoLine(0);
+                that.ignoreChange = false;
             });
         }
     });
@@ -44812,7 +44823,7 @@ define('views/preview',[
             this.book = this.parent;
             this.sections = [];
 
-            this.listenTo(this.book, "open", this.onArticleChange);
+            this.listenTo(this.book, "article", this.onArticleChange);
         },
 
         templateContext: function() {
@@ -44876,6 +44887,7 @@ define('views/book',[
 
             // Map article path -> content
             this.articles = {};
+            this.currentArticle = null;
 
             this.grid = new Grid({
                 columns: 3
@@ -44905,7 +44917,8 @@ define('views/book',[
             var that = this;
 
             var doOpen = function() {
-                that.trigger("open", article);
+                that.currentArticle = article;
+                that.trigger("article:open", article);
 
                 return Q();
             };
@@ -44944,6 +44957,8 @@ define('views/book',[
             var path = article.get("path");
 
             this.articles[path] = content;
+            this.trigger("article:write", article);
+
             return Q();
         },
         saveArticle: function(article, content) {

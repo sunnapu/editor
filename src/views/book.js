@@ -20,6 +20,7 @@ define([
 
             // Map article path -> content
             this.articles = {};
+            this.currentArticle = null;
 
             this.grid = new Grid({
                 columns: 3
@@ -49,7 +50,8 @@ define([
             var that = this;
 
             var doOpen = function() {
-                that.trigger("open", article);
+                that.currentArticle = article;
+                that.trigger("article:open", article);
 
                 return Q();
             };
@@ -88,6 +90,8 @@ define([
             var path = article.get("path");
 
             this.articles[path] = content;
+            this.trigger("article:write", article);
+
             return Q();
         },
         saveArticle: function(article, content) {
