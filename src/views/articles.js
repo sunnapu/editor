@@ -24,7 +24,7 @@ define([
             var that = this;
             ArticleItem.__super__.initialize.apply(this, arguments);
 
-            this.articles = new ArticlesView({}, this.list.parent);
+            this.articles = new ArticlesView({collection: this.model.articles}, this.list.parent);
             this.summary = this.list.parent;
             this.editor = this.summary.parent;
             
@@ -44,6 +44,7 @@ define([
                     that.collection.add(article, {
                         at: i
                     });
+                    that.summary.save();
                 }
             });
 
@@ -105,6 +106,7 @@ define([
         onChangeTitle: function() {
             this.toggleEdit(false);
             this.model.set("title", this.$("> input").val());
+            this.summary.save();
         },
 
         onKeyUp: function(e) {

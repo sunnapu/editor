@@ -71,11 +71,11 @@ define([
          *
          * @return Promise()
          */
-        write: function(path) {
+        write: function(_path, content) {
             var that = this;
             _path = this.realPath(_path);
 
-            return Q.nfcall(fs.writeFile, _path);
+            return Q.nfcall(fs.writeFile, _path, content);
         },
 
         /*

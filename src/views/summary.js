@@ -7,6 +7,7 @@ define([
     var SummaryTrash = hr.View.extend({
         className: "trash",
         initialize: function() {
+            var that = this;
             SummaryTrash.__super__.initialize.apply(this, arguments);
 
             this.summary = this.parent;
@@ -20,6 +21,7 @@ define([
                 dragType: this.summary.drag,
                 handler: function(article) {
                     article.destroy();
+                    that.summary.save();
                 }
             });
         },

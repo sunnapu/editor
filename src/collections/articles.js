@@ -2,11 +2,11 @@ define([
     "hr/hr",
     "hr/utils",
     "models/article"
-], function(hr, Article) {
+], function(hr, _, Article) {
     var parseSummary = node.require("gitbook").parse.summary;
 
     var Articles = hr.Collection.extend({
-        Model: Article,
+        model: Article,
 
         /*
          *  Parse SUMMARY.md content to extract articles tree
@@ -14,7 +14,12 @@ define([
         parseSummary: function(content) {
             var summary = parseSummary(content);
             
-            this.reset(summary.chapters);
+            try {
+                this.reset(summary.chapters);
+            } catch (e) {
+                console.error(e.stack);
+            }
+            
         },
 
         /*
@@ -22,18 +27,27 @@ define([
          */
         toMarkdown: function() {
             var bl = "\n";
-            var content = "# Summary"+bl;
+            var content = "# Summary"+bl+bl;
 
-            this.each(function(article) {
-                var title = article.get("title");
-                var path = article.get("path");
-
-                if (path) {
-                    content = content + "* ["+title+"]("+path+")";
+            var _base = function(_article) {
+                var article = _article.toJSON();
+                if (article.path) {
+                    return "* ["+article.title+"]("+article.path+")";
                 } else {
-                    content = content + "* "+title;
+                    return "* "+article.title;
                 }
-                content = content+bl;
+            }
+
+            this.each(function(chapter) {
+                content = content + _base(chapter)+bl;
+
+                // Articles
+                if (chapter.articles.size() > 0) {
+                    
+                    chapter.articles.each(function(article) {
+                        content = content+"    "+_base(article)+bl;
+                    });
+                }
             });
 
             content = content+bl;
