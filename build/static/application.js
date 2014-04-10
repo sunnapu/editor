@@ -23545,7 +23545,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397169058081,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397169180186,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -24586,7 +24586,7 @@ define('collections/articles',[
     });
 }());
 
-define('text!resources/templates/article.html',[],function () { return '<div class="chapter-actions">\n    <a href="#" class="action action-edit"><i class="fa fa-pencil"></i></a>\n    <% if (article.get("level").length == 1) { %>\n    <a href="#" class="action action-add"><i class="fa fa-plus-square"></i></a>\n    <% } %>\n</div>\n<span class="chapter-title"><%- article.get("title") %></span>\n<input type="text" class="form-control" value="<%- article.get("title") %>" />\n<div class="chapter-articles"></div>';});
+define('text!resources/templates/article.html',[],function () { return '<div class="chapter-actions">\n    <% if (article.get("level").length == 1) { %>\n    <a href="#" class="action action-add"><i class="fa fa-plus-square"></i></a>\n    <% } %>\n</div>\n<span class="chapter-title"><%- article.get("title") %></span>\n<input type="text" class="form-control" value="<%- article.get("title") %>" />\n<div class="chapter-articles"></div>';});
 
 define('views/articles',[
     "hr/hr",
@@ -24601,8 +24601,7 @@ define('views/articles',[
         events: {
             "click": "open",
             "dblclick": "toggleEdit",
-
-            "click .action-edit": "toggleEdit",
+            
             "click .action-add": "addChapter",
 
             "change > input": "onChangeTitle",

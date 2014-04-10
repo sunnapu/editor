@@ -11,8 +11,7 @@ define([
         events: {
             "click": "open",
             "dblclick": "toggleEdit",
-
-            "click .action-edit": "toggleEdit",
+            
             "click .action-add": "addChapter",
 
             "change > input": "onChangeTitle",
