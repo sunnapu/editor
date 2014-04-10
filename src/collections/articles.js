@@ -1,15 +1,20 @@
 define([
     "hr/hr",
+    "hr/utils",
     "models/article"
 ], function(hr, Article) {
-    var Articles = hr.Model.extend({
+    var parseSummary = node.require("gitbook").parse.summary;
+
+    var Articles = hr.Collection.extend({
         Model: Article,
 
         /*
          *  Parse SUMMARY.md content to extract articles tree
          */
         parseSummary: function(content) {
-            console.log(content);
+            var summary = parseSummary(content);
+            
+            this.reset(summary.chapters);
         },
 
         /*

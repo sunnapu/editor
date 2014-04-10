@@ -4,13 +4,13 @@ define([
     var Article = hr.Model.extend({
         defaults: {
             title: null,
-            path: null
+            path: null,
+            level: "1",
+            articles: []
         },
 
         initialize: function() {
             Article.__super__.initialize.apply(this, arguments);
-
-            this.file = this.options.file;
         }
     });
 

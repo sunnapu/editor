@@ -61,7 +61,10 @@ define([
             var that = this;
             _path = this.realPath(_path);
 
-            return Q.nfcall(fs.readFile, _path);
+            return Q.nfcall(fs.readFile, _path)
+            .then(function(buf) {
+                return buf.toString();
+            });
         },
 
         /*

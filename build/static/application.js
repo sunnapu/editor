@@ -23545,7 +23545,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397124061126,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397125931820,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -23680,7 +23680,10 @@ define('core/fs/local',[
             var that = this;
             _path = this.realPath(_path);
 
-            return Q.nfcall(fs.readFile, _path);
+            return Q.nfcall(fs.readFile, _path)
+            .then(function(buf) {
+                return buf.toString();
+            });
         },
 
         /*
@@ -24264,6 +24267,70 @@ define('views/grid',[
 
     return GridView;
 });
+define('models/article',[
+    "hr/hr"
+], function(hr) {
+    var Article = hr.Model.extend({
+        defaults: {
+            title: null,
+            path: null,
+            level: "1",
+            articles: []
+        },
+
+        initialize: function() {
+            Article.__super__.initialize.apply(this, arguments);
+        }
+    });
+
+    return Article;
+});
+define('collections/articles',[
+    "hr/hr",
+    "hr/utils",
+    "models/article"
+], function(hr, Article) {
+    var parseSummary = node.require("gitbook").parse.summary;
+
+    var Articles = hr.Collection.extend({
+        Model: Article,
+
+        /*
+         *  Parse SUMMARY.md content to extract articles tree
+         */
+        parseSummary: function(content) {
+            var summary = parseSummary(content);
+            
+            this.reset(summary.chapters);
+        },
+
+        /*
+         *  Return a markdown representation of the summary
+         */
+        toMarkdown: function() {
+            var bl = "\n";
+            var content = "# Summary"+bl;
+
+            this.each(function(article) {
+                var title = article.get("title");
+                var path = article.get("path");
+
+                if (path) {
+                    content = content + "* ["+title+"]("+path+")";
+                } else {
+                    content = content + "* "+title;
+                }
+                content = content+bl;
+            });
+
+            content = content+bl;
+
+            return content;
+        }
+    });
+
+    return Articles;
+});
 /**
  * @license RequireJS text 1.0.0 Copyright (c) 2010-2011, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
@@ -24541,18 +24608,35 @@ define('views/grid',[
     });
 }());
 
-define('text!resources/templates/article.html',[],function () { return '<span class="title"><%- article.get("title") %></span>';});
+define('text!resources/templates/article.html',[],function () { return '<span class="title"><%- article.get("title") %></span><div class="chapter-articles"></div>';});
 
 define('views/articles',[
     "hr/hr",
+    "collections/articles",
     "text!resources/templates/article.html"
-], function(hr, templateFile) {
+], function(hr, Articles, templateFile) {
 
     var ArticleItem = hr.List.Item.extend({
         className: "article",
         template: templateFile,
         events: {
             "click": "open"
+        },
+
+        initialize: function() {
+            ArticleItem.__super__.initialize.apply(this, arguments);
+
+            this.articles = new ArticlesView({}, this.parent.parent);
+        },
+
+        render: function() {
+            this.articles.collection.reset(this.model.get("articles", []));
+            return ArticleItem.__super__.render.apply(this, arguments);
+        },
+
+        finish: function() {
+            this.articles.appendTo(this.$(".chapter-articles"));
+            return ArticleItem.__super__.finish.apply(this, arguments);
         },
 
         templateContext: function() {
@@ -24571,7 +24655,7 @@ define('views/articles',[
 
     var ArticlesView = hr.List.extend({
         className: "articles",
-        Collection: hr.Collection,
+        Collection: Articles,
         Item: ArticleItem
     });
 
@@ -24603,11 +24687,9 @@ define('views/summary',[
             ]);
 
             this.load();
-            this.update();
         },
 
         finish: function() {
-            console.log("after");
             this.articles.$el.appendTo(this.$(".inner"));
             return Summary.__super__.finish.apply(this, arguments);
         },
@@ -24621,6 +24703,8 @@ define('views/summary',[
             this.parent.fs.read("SUMMARY.md")
             .then(function(content) {
                 that.articles.collection.parseSummary(content);
+            }, function(err) {
+                console.log("error", err);
             });
         },
 
@@ -42311,13 +42395,18 @@ define('views/book',[
 
             // Summary
             this.summary = new Summary({}, this);
+            this.summary.update();
             this.grid.addView(this.summary, {width: 20});
 
             // Editor
-            this.grid.addView(new Editor({}, this));
+            this.editor = new Editor({}, this);
+            this.editor.update();
+            this.grid.addView(this.editor);
 
-            // preview
-            this.grid.addView(new Preview({}, this));
+            // Preview
+            this.preview = new Preview({}, this);
+            this.preview.update();
+            this.grid.addView(this.preview);
         },
 
         /*

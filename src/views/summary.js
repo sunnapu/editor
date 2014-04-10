@@ -22,11 +22,9 @@ define([
             ]);
 
             this.load();
-            this.update();
         },
 
         finish: function() {
-            console.log("after");
             this.articles.$el.appendTo(this.$(".inner"));
             return Summary.__super__.finish.apply(this, arguments);
         },
@@ -40,6 +38,8 @@ define([
             this.parent.fs.read("SUMMARY.md")
             .then(function(content) {
                 that.articles.collection.parseSummary(content);
+            }, function(err) {
+                console.log("error", err);
             });
         },
 

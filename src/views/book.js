@@ -23,13 +23,18 @@ define([
 
             // Summary
             this.summary = new Summary({}, this);
+            this.summary.update();
             this.grid.addView(this.summary, {width: 20});
 
             // Editor
-            this.grid.addView(new Editor({}, this));
+            this.editor = new Editor({}, this);
+            this.editor.update();
+            this.grid.addView(this.editor);
 
-            // preview
-            this.grid.addView(new Preview({}, this));
+            // Preview
+            this.preview = new Preview({}, this);
+            this.preview.update();
+            this.grid.addView(this.preview);
         },
 
         /*

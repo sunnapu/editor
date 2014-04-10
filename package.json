@@ -19,7 +19,9 @@
     },
     "author": "Samy Pesse <samypesse@gmail.com>",
     "license": "Apache 2",
-    "dependencies": {},
+    "dependencies": {
+        "gitbook": "0.1.3"
+    },
     "devDependencies": {
         "lodash": "2.4.1",
         "hr.js": "0.6.4",
