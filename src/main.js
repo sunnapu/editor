@@ -3,10 +3,10 @@ require([
     "hr/dom",
     "hr/hr",
     "hr/args",
-    "core/fs/all",
+    "core/fs",
     "views/book",
     "text!resources/templates/main.html"
-], function(_, $, hr, args, fs, Book, templateFile) {
+], function(_, $, hr, args, Fs, Book, templateFile) {
     // Configure hr
     hr.configure(args);
 
@@ -57,7 +57,7 @@ require([
             if (!path) return;
 
             this.setBook(new Book({
-                fs: new fs.local({
+                fs: new Fs({
                     base: path
                 })
             }));

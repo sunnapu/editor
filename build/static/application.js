@@ -23545,7 +23545,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397125931820,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397126050009,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -23569,65 +23569,16 @@ define('models/file',[
 
     return File;
 });
-define('core/fs/base',[
-    "hr/hr",
-    "hr/promise"
-], function(hr, Q) {
-    var _notDefined = function() {
-        return Q.reject(new Error("This FS method is not defined"));
-    };
-
-    var Fs = hr.Class.extend({
-        /*
-         * Read a directory content by its path
-         *
-         * @return Promise([File])
-         */
-        readdir: function(path) {
-            return _notDefined();
-        },
-
-        /*
-         * Read a file by its path
-         *
-         * @return Promise(String)
-         */
-        read: function(path) {
-            return _notDefined();
-        },
-
-        /*
-         * Write a file by its path
-         *
-         * @return Promise()
-         */
-        write: function(path) {
-            return _notDefined();
-        },
-
-        /*
-         * Commit all changes
-         *
-         * @return Promise()
-         */
-        commit: function(message) {
-            return _notDefined();
-        }
-    });
-
-    return Fs;
-});
-define('core/fs/local',[
+define('core/fs',[
     "hr/hr",
     "hr/promise",
     "hr/utils",
-    "models/file",
-    "core/fs/base"
-], function(hr, Q, _, File, Fs) {
+    "models/file"
+], function(hr, Q, _, File) {
     var fs = node.require("fs");
     var path = node.require("path");
 
-    var LocalFs = Fs.extend({
+    var LocalFs = hr.Class.extend({
         virtualPath: function(_path) {
             return path.relative(this.options.base, _path);
         },
@@ -23709,13 +23660,6 @@ define('core/fs/local',[
     });
 
     return LocalFs;
-});
-define('core/fs/all',[
-    "core/fs/local"
-], function(LocalFs) {
-    return {
-        local: LocalFs
-    };
 });
 define('utils/dragdrop',[
     'hr/utils',
@@ -42426,10 +42370,10 @@ require([
     "hr/dom",
     "hr/hr",
     "hr/args",
-    "core/fs/all",
+    "core/fs",
     "views/book",
     "text!resources/templates/main.html"
-], function(_, $, hr, args, fs, Book, templateFile) {
+], function(_, $, hr, args, Fs, Book, templateFile) {
     // Configure hr
     hr.configure(args);
 
@@ -42480,7 +42424,7 @@ require([
             if (!path) return;
 
             this.setBook(new Book({
-                fs: new fs.local({
+                fs: new Fs({
                     base: path
                 })
             }));
