@@ -34,6 +34,7 @@ module.exports = function (grunt) {
 
                 // Static files mappage
                 "static": {
+                    "ace": path.resolve(srcPath, "vendors", "ace"),
                     "fonts": path.resolve(srcPath, "resources", "fonts"),
                     "images": path.resolve(srcPath, "resources", "images")
                 },
@@ -42,8 +43,14 @@ module.exports = function (grunt) {
                 "style": path.resolve(srcPath, "resources/stylesheets/main.less"),
 
                 // Modules paths
-                'paths': {},
-                "shim": {},
+                'paths': {
+                    "ace": "vendors/ace/ace"
+                },
+                "shim": {
+                    "ace": {
+                        exports: "ace"
+                    }
+                },
                 'args': {},
                 'options': {}
             }
