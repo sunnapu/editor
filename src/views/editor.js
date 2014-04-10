@@ -12,6 +12,8 @@ define([
         initialize: function() {
             Editor.__super__.initialize.apply(this, arguments);
 
+            this.book = this.parent;
+
             this.$inner = $("<div>", {'class': "inner"});
             this.$inner.appendTo(this.$el);
 
@@ -20,6 +22,18 @@ define([
             this.editor.setTheme("ace/theme/chrome");
             this.editor.getSession().setMode("ace/mode/markdown");
             this.editor.setShowPrintMargin(false);
+
+            this.listenTo(this.book, "open", this.onArticleChange);
+        },
+
+        onArticleChange: function(article) {
+            var that = this;
+
+            this.book.readArticle(article)
+            .then(function(content) {
+                that.editor.setValue(content);
+                that.editor.gotoLine(0);
+            });
         }
     });
 

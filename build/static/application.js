@@ -25562,7 +25562,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397170331485,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397172712098,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -44763,6 +44763,8 @@ define('views/editor',[
         initialize: function() {
             Editor.__super__.initialize.apply(this, arguments);
 
+            this.book = this.parent;
+
             this.$inner = $("<div>", {'class': "inner"});
             this.$inner.appendTo(this.$el);
 
@@ -44771,6 +44773,18 @@ define('views/editor',[
             this.editor.setTheme("ace/theme/chrome");
             this.editor.getSession().setMode("ace/mode/markdown");
             this.editor.setShowPrintMargin(false);
+
+            this.listenTo(this.book, "open", this.onArticleChange);
+        },
+
+        onArticleChange: function(article) {
+            var that = this;
+
+            this.book.readArticle(article)
+            .then(function(content) {
+                that.editor.setValue(content);
+                that.editor.gotoLine(0);
+            });
         }
     });
 
@@ -44795,12 +44809,13 @@ define('views/preview',[
 });
 define('views/book',[
     "hr/hr",
+    "hr/promise",
     "utils/dialogs",
     "views/grid",
     "views/summary",
     "views/editor",
     "views/preview"
-], function(hr, dialogs, Grid, Summary, Editor, Preview) {
+], function(hr, Q, dialogs, Grid, Summary, Editor, Preview) {
     var Book = hr.View.extend({
         className: "book",
         defaults: {
@@ -44811,6 +44826,9 @@ define('views/book',[
             Book.__super__.initialize.apply(this, arguments);
 
             this.fs = this.options.fs;
+
+            // Map article path -> content
+            this.articles = {};
 
             this.grid = new Grid({
                 columns: 3
@@ -44837,12 +44855,54 @@ define('views/book',[
          * Show an article
          */
         openArticle: function(article) {
+            var that = this;
+
+            var doOpen = function() {
+                that.trigger("open", article);
+
+                return Q();
+            };
+
             if (!article.get("path")) {
-                dialogs.prompt("Enter filename for this chapter:", "", article.get("title")+".md")
+                return dialogs.prompt("Enter filename for this chapter:", "", article.get("title")+".md")
                 .then(function(path) {
                     article.set("path", path);
+                    return that.writeArticle(article, "#"+article.get("title")+"\n")
+                })
+                .then(function() {
+                    return that.saveArticle(article);
+                })
+                .then(function() {
+                    return doOpen();
                 });
             }
+
+            return doOpen();
+        },
+
+        // Read/Write article in this fs
+        readArticle: function(article) {
+            var that = this;
+            var path = article.get("path");
+
+            if (this.articles[path]) return Q(this.articles[path]);
+
+            return this.fs.read(path)
+            .then(function(content) {
+                that.articles[path] = content;
+                return content;
+            });
+        },
+        writeArticle: function(article, content) {
+            var path = article.get("path");
+
+            this.articles[path] = content;
+            return Q();
+        },
+        saveArticle: function(article, content) {
+            var path = article.get("path");
+            if (!this.articles[path]) return Q.reject(new Error("No content to save for this article"));
+            return this.fs.write(article.get("path"), content);
         }
     });
 
