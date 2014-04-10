@@ -1,0 +1,7 @@
+<div class="inner">
+    <% _.each(sections, function(section) { %>
+        <% if (section.type == "normal") { %>
+        <section id="<%- section.id %>"><%= section.content %></section>
+        <% } %>
+    <% }); %>
+</div>

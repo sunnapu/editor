@@ -25562,7 +25562,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397172712098,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397173573617,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -44790,18 +44790,66 @@ define('views/editor',[
 
     return Editor;
 });
+define('text!resources/templates/preview.html',[],function () { return '<div class="inner">\n    <% _.each(sections, function(section) { %>\n        <% if (section.type == "normal") { %>\n        <section id="<%- section.id %>"><%= section.content %></section>\n        <% } %>\n    <% }); %>\n</div>';});
+
 define('views/preview',[
     "hr/hr",
-    "hr/dom"
-], function(hr, $) {
+    "hr/utils",
+    "hr/promise",
+    "hr/dom",
+    "text!resources/templates/preview.html"
+], function(hr, _, Q, $, templateFile) {
+    var path = node.require("path");
+    var parse = node.require("gitbook").parse;
+
     var Preview = hr.View.extend({
         className: "preview",
+        template: templateFile,
 
         initialize: function() {
             Preview.__super__.initialize.apply(this, arguments);
 
-            this.$inner = $("<div>", {'class': "inner"});
-            this.$inner.appendTo(this.$el);
+            this.book = this.parent;
+            this.sections = [];
+
+            this.listenTo(this.book, "open", this.onArticleChange);
+        },
+
+        templateContext: function() {
+            return {
+                sections: this.sections
+            };
+        },
+
+        parseArticle: function(article, content) {
+            var that = this;
+            var _input = article.get("path");
+
+            return Q()
+            .then(function() {
+                // Lex page
+                return parse.lex(content);
+            })
+            .then(function(lexed) {
+                // Get HTML generated sections
+                return parse.page(lexed, {
+                    repo: "",
+                    dir: path.dirname(_input) || '/',
+                    outdir: path.dirname(_input) || '/',
+                });
+            })
+            .then(function(sections) {
+                console.log(sections);
+                that.sections = sections;
+                that.update();
+            });
+        },
+
+        onArticleChange: function(article) {
+            var that = this;
+
+            this.book.readArticle(article)
+            .then(_.partial(this.parseArticle, article).bind(this));
         }
     });
 
