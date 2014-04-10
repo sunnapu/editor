@@ -1,10 +1,11 @@
 define([
     "hr/hr",
+    "utils/dialogs",
     "views/grid",
     "views/summary",
     "views/editor",
     "views/preview"
-], function(hr, Grid, Summary, Editor, Preview) {
+], function(hr, dialogs, Grid, Summary, Editor, Preview) {
     var Book = hr.View.extend({
         className: "book",
         defaults: {
@@ -41,7 +42,12 @@ define([
          * Show an article
          */
         openArticle: function(article) {
-            
+            if (!article.get("path")) {
+                dialogs.prompt("Enter filename for this chapter:", "", article.get("title")+".md")
+                .then(function(path) {
+                    article.set("path", path);
+                });
+            }
         }
     });
 

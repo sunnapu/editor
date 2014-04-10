@@ -47,6 +47,23 @@ module.exports = function (grunt) {
                     "ace": "vendors/ace/ace"
                 },
                 "shim": {
+                    "main": {
+                        deps: [
+                            'hr/dom',
+                            'vendors/bootstrap/carousel',
+                            'vendors/bootstrap/dropdown',
+                            'vendors/bootstrap/button',
+                            'vendors/bootstrap/modal',
+                            'vendors/bootstrap/affix',
+                            'vendors/bootstrap/alert',
+                            'vendors/bootstrap/collapse',
+                            'vendors/bootstrap/tooltip',
+                            'vendors/bootstrap/popover',
+                            'vendors/bootstrap/scrollspy',
+                            'vendors/bootstrap/tab',
+                            'vendors/bootstrap/transition'
+                        ]
+                    },
                     "ace": {
                         exports: "ace"
                     }

@@ -76,7 +76,7 @@ define([
             e.preventDefault();
             e.stopPropagation();
 
-            this.editor.openArticle(this);
+            this.editor.openArticle(this.model);
         },
 
         toggleEdit: function(e) {
