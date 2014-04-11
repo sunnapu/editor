@@ -9,7 +9,7 @@
         "height": 600,
         "icon": "build/static/images/icons/128.png",
         "position": "center",
-        "show": true,
+        "show": false,
         "toolbar": false,
         "frame": true
     },

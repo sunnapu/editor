@@ -8,6 +8,7 @@ require([
     "text!resources/templates/main.html"
 ], function(_, $, hr, args, Fs, Book, templateFile) {
     var path = node.require("path");
+    var gui = node.gui;
     var __dirname = node.require("../src/dirname");
 
     // Configure hr
@@ -35,7 +36,7 @@ require([
             this.editor = null;
             this.book = null;
 
-            var gui = node.gui;
+            
 
             var menu = new gui.Menu({ type: 'menubar' });
 
@@ -56,14 +57,29 @@ require([
                 }
             }));
 
+            var devMenu = new node.gui.Menu();
+            devMenu.append(new gui.MenuItem({
+                label: 'Open Tools',
+                click: function () {
+                    var win = gui.Window.get();
+                    win.showDevTools();
+                }
+            }));
+
             menu.append(new gui.MenuItem({
                 label: 'File',
                 submenu: fileMenu
+            }));
+            menu.append(new gui.MenuItem({
+                label: 'Develop',
+                submenu: devMenu
             }));
             gui.Window.get().menu = menu;
         },
 
         render: function() {
+            gui.Window.get().show();
+
             if (this.book) this.book.detach();
             return Application.__super__.render.apply(this, arguments);
         },
