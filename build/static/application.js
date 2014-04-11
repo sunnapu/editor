@@ -25562,7 +25562,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397202972029,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397203413535,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -26928,9 +26928,10 @@ define('text!resources/templates/article.html',[],function () { return '<div cla
 define('views/articles',[
     "hr/hr",
     "utils/dragdrop",
+    "utils/dialogs",
     "collections/articles",
     "text!resources/templates/article.html"
-], function(hr, dnd, Articles, templateFile) {
+], function(hr, dnd, dialogs, Articles, templateFile) {
 
     var ArticleItem = hr.List.Item.extend({
         className: "article",
@@ -27023,10 +27024,18 @@ define('views/articles',[
         },
 
         addChapter: function(e) {
+            var that = this;
+
             if (e) {
                 e.preventDefault();
                 e.stopPropagation();
             }
+
+            dialogs.prompt("Add new article", "Enter a title for the new article", "Article")
+            .then(function(title) {
+                that.model.articles.add({'title': title});
+                that.summary.save();
+            });
         },
 
         onChangeTitle: function() {
@@ -27135,7 +27144,12 @@ define('views/summary',[
          * Save summary content
          */
         save: function() {
-            return this.parent.fs.write("SUMMARY.md", this.articles.collection.toMarkdown());
+            var that = this;
+            
+            return this.parent.fs.write("SUMMARY.md", this.articles.collection.toMarkdown())
+            .then(function() {
+                return that.load();
+            });
         }
     });
 

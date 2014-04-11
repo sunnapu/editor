@@ -1,9 +1,10 @@
 define([
     "hr/hr",
     "utils/dragdrop",
+    "utils/dialogs",
     "collections/articles",
     "text!resources/templates/article.html"
-], function(hr, dnd, Articles, templateFile) {
+], function(hr, dnd, dialogs, Articles, templateFile) {
 
     var ArticleItem = hr.List.Item.extend({
         className: "article",
@@ -96,10 +97,18 @@ define([
         },
 
         addChapter: function(e) {
+            var that = this;
+
             if (e) {
                 e.preventDefault();
                 e.stopPropagation();
             }
+
+            dialogs.prompt("Add new article", "Enter a title for the new article", "Article")
+            .then(function(title) {
+                that.model.articles.add({'title': title});
+                that.summary.save();
+            });
         },
 
         onChangeTitle: function() {

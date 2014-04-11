@@ -76,7 +76,12 @@ define([
          * Save summary content
          */
         save: function() {
-            return this.parent.fs.write("SUMMARY.md", this.articles.collection.toMarkdown());
+            var that = this;
+            
+            return this.parent.fs.write("SUMMARY.md", this.articles.collection.toMarkdown())
+            .then(function() {
+                return that.load();
+            });
         }
     });
 
