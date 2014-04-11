@@ -2,7 +2,7 @@
 
 ### Work in progress!
 
-(screenshot coming soon!)
+![Image](https://raw.github.com/GitbookIO/editor/master/preview.png)
 
 ### How to test it?
 
