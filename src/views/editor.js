@@ -44,7 +44,7 @@ define([
         },
 
         finish: function() {
-            this.$editor.appendTo(this.$(".inner"));
+            this.$editor.appendTo(this.$(".content"));
             return Editor.__super__.finish.apply(this, arguments);
         },
 

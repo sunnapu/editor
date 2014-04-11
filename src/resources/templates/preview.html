@@ -1,7 +1,16 @@
 <div class="inner">
-    <% _.each(sections, function(section) { %>
-        <% if (section.type == "normal") { %>
-        <section id="<%- section.id %>"><%= section.content %></section>
-        <% } %>
-    <% }); %>
+    <div class="toolbar">
+        <div class="btn-toolbar" role="toolbar" style="margin: 0;">
+            <div class="btn-group">
+                <button class="btn btn-default disabled">PREVIEW</button>
+            </div>
+        </div>
+    </div>
+    <div class="content">
+        <% _.each(sections, function(section) { %>
+            <% if (section.type == "normal") { %>
+            <section id="<%- section.id %>"><%= section.content %></section>
+            <% } %>
+        <% }); %>
+    </div>
 </div>
