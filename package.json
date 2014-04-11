@@ -10,7 +10,7 @@
         "icon": "build/static/images/icons/128.png",
         "position": "center",
         "show": true,
-        "toolbar": true,
+        "toolbar": false,
         "frame": true
     },
     "repository": {
@@ -26,7 +26,8 @@
         "lodash": "2.4.1",
         "hr.js": "0.6.4",
         "grunt": "~0.4.1",
-        "grunt-contrib-clean": "~0.5.0"
+        "grunt-contrib-clean": "~0.5.0",
+        "grunt-node-webkit-builder": "0.1.19"
     },
     "peerDependencies": {
         "grunt": "~0.4.1"

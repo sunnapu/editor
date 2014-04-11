@@ -8,6 +8,9 @@ module.exports = function (grunt) {
     // Load grunt modules
     grunt.loadNpmTasks('hr.js');
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-node-webkit-builder');
+
+    var NW_VERSION = "0.9.2";
 
     // Init GRUNT configuraton
     grunt.initConfig({
@@ -72,8 +75,24 @@ module.exports = function (grunt) {
                 'options': {}
             }
         },
+        nodewebkit: {
+            options: {
+                app_name: "GitBook",
+                build_dir: './appbuilds',
+                mac: true,
+                win: false,
+                linux32: false,
+                linux64: false,
+                mac_icns: "./build/static/images/icons/512.icns",
+                credits: "./src/credits.html",
+                version: NW_VERSION,
+                zip: false
+            },
+            src: ['./**/*']
+        },
         clean: {
-            build: ['build/']
+            build: ['build/'],
+            releases: ['appbuilds/releases']
         }
     });
 
@@ -82,6 +101,12 @@ module.exports = function (grunt) {
         'hr:app'
     ]);
 
+    // Release
+    grunt.registerTask('build-apps', [
+        'clean:releases',
+        'build',
+        'nodewebkit'
+    ]);
 
     grunt.registerTask('default', [
         'build'
