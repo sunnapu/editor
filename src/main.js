@@ -66,6 +66,20 @@ require([
                 }
             }));
 
+            var helpMenu = new node.gui.Menu();
+            helpMenu.append(new gui.MenuItem({
+                label: 'GitHub',
+                click: function () {
+                    gui.Shell.openExternal('https://github.com/GitbookIO/gitbook');
+                }
+            }));
+            helpMenu.append(new gui.MenuItem({
+                label: 'Send Feedback',
+                click: function () {
+                    gui.Shell.openExternal('https://github.com/GitbookIO/editor/issues');
+                }
+            }));
+
             menu.append(new gui.MenuItem({
                 label: 'File',
                 submenu: fileMenu
@@ -73,6 +87,10 @@ require([
             menu.append(new gui.MenuItem({
                 label: 'Develop',
                 submenu: devMenu
+            }));
+            menu.append(new gui.MenuItem({
+                label: 'Help',
+                submenu: helpMenu
             }));
             gui.Window.get().menu = menu;
         },
