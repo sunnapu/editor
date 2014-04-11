@@ -25562,7 +25562,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397174731735,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397174921399,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
