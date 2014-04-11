@@ -7,11 +7,27 @@ define([
     var aceconfig = ace.require("ace/config");
     aceconfig.set("basePath", "static/ace");
 
+    var textAction = function(before, after) {
+        return function() {
+            if (this.editor.selection.isEmpty()) {
+                this.editor.insert(before+after);
+                this.editor.selection.moveCursorBy(0, -(after.length));
+            } else {
+                var c = this.editor.session.getTextRange(this.editor.getSelectionRange());
+                this.editor.session.replace(this.editor.getSelectionRange(), before+c+after);
+            }
+
+            this.editor.focus();
+        };
+    };
+
+
     var Editor = hr.View.extend({
         className: "book-section editor",
         template: templateFile,
         events: {
-            "click .action-save": "doSave"
+            "click .action-save": "doSave",
+            "click .action-text-bold": textAction("**", "**")
         },
 
         initialize: function() {
