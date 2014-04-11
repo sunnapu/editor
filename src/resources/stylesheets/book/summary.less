@@ -65,6 +65,7 @@
             position: relative;
             border-top: 2px solid transparent;
             border-bottom: 2px solid transparent;
+            cursor: pointer;
 
             &.move,
             &.active.move {
@@ -95,28 +96,6 @@
                 &:hover {
                     background: rgba(0,0,0,0.02);
                     border-radius: 3px;
-                }
-            }
-
-            input {
-                position:absolute;
-                
-                left: 0px;
-                top: 0px;
-                height: 36px;
-                right: 0px;
-                z-index: 2;
-
-                display: none;
-                border: none;
-                .box-shadow(none);
-                padding: 8px 10px;
-                margin: 0px;
-            }
-
-            &.mode-edit {
-                > input {
-                    display: block;
                 }
             }
 

@@ -6,16 +6,11 @@ define([
     "text!resources/templates/article.html",
     "utils/dblclick"
 ], function(hr, dnd, dialogs, Articles, templateFile) {
-    var articlesGlobal = new hr.Class();
-
     var ArticleItem = hr.List.Item.extend({
         className: "article",
         template: templateFile,
         events: {
-            "click > .chapter-actions .action-add": "addChapter",
-
-            "change > input": "onChangeTitle",
-            "keyup > input": "onKeyUp"
+            "click > .chapter-actions .action-add": "addChapter"
         },
 
         initialize: function() {
@@ -25,11 +20,6 @@ define([
             this.articles = new ArticlesView({collection: this.model.articles}, this.list.parent);
             this.summary = this.list.parent;
             this.editor = this.summary.parent;
-
-            this.listenTo(articlesGlobal, "mode:edit", function(_art) {
-                if (_art.cid != this.cid) this.toggleEdit(false);
-            });
-            
 
             // Drop tabs to order
             this.dropArea = new dnd.DropArea({
@@ -67,7 +57,7 @@ define([
         finish: function() {
             this.articles.appendTo(this.$(".chapter-articles"));
 
-            this.$("> .chapter-title").singleDblClick(this.open.bind(this), this.toggleEdit.bind(this));
+            this.$("> .chapter-title").singleDblClick(this.open.bind(this), this.changeTitle.bind(this));
 
             return ArticleItem.__super__.finish.apply(this, arguments);
         },
@@ -85,21 +75,12 @@ define([
             this.editor.openArticle(this.model);
         },
 
-        toggleEdit: function(e) {
-            var $input = this.$("> input");
-            if (typeof e != "boolean") {
-                e.preventDefault();
-                e.stopPropagation();
-                e = null;
-            }
-
-            this.$el.toggleClass("mode-edit", e);
-            if (this.$el.hasClass("mode-edit")) {
-                articlesGlobal.trigger("mode:edit", this);
-                $input.focus();
-            } else {
-                $input.blur();
-            }
+        changeTitle: function() {
+            dialogs.prompt("Change Title", "", this.model.get("title"))
+            .then(function(title) {
+                this.model.set("title", title);
+                this.summary.save();
+            }.bind(this));
         },
 
         addChapter: function(e) {
@@ -115,16 +96,6 @@ define([
                 that.model.articles.add({'title': title});
                 that.summary.save();
             });
-        },
-
-        onChangeTitle: function() {
-            this.toggleEdit(false);
-            this.model.set("title", this.$("> input").val());
-            this.summary.save();
-        },
-
-        onKeyUp: function(e) {
-            if (e.which == 13) this.toggleEdit(false);
         }
     });
 
