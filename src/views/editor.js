@@ -36,6 +36,7 @@ define([
                 'cssText': ""
             });
             this.editor.getSession().setMode("ace/mode/markdown");
+            this.editor.setOption("showGutter", false);
             this.editor.setShowPrintMargin(false);
             this.editor.setHighlightActiveLine(false);
 
