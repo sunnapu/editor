@@ -28,9 +28,14 @@ define([
                 this.book.writeArticle(this.book.currentArticle, content);
             }.bind(this));
 
-            this.editor.setTheme("ace/theme/chrome");
+            this.editor.setTheme({
+                'isDark': false,
+                'cssClass': "ace-tm",
+                'cssText': ""
+            });
             this.editor.getSession().setMode("ace/mode/markdown");
             this.editor.setShowPrintMargin(false);
+            this.editor.setHighlightActiveLine(false);
 
             this.listenTo(this.book, "article:open", this.onArticleChange);
         },

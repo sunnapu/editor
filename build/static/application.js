@@ -25562,7 +25562,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397174039199,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397174731735,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -44779,9 +44779,14 @@ define('views/editor',[
                 this.book.writeArticle(this.book.currentArticle, content);
             }.bind(this));
 
-            this.editor.setTheme("ace/theme/chrome");
+            this.editor.setTheme({
+                'isDark': false,
+                'cssClass': "ace-tm",
+                'cssText': ""
+            });
             this.editor.getSession().setMode("ace/mode/markdown");
             this.editor.setShowPrintMargin(false);
+            this.editor.setHighlightActiveLine(false);
 
             this.listenTo(this.book, "article:open", this.onArticleChange);
         },
