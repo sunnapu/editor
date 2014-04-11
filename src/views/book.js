@@ -2,11 +2,12 @@ define([
     "hr/hr",
     "hr/promise",
     "utils/dialogs",
+    "models/article",
     "views/grid",
     "views/summary",
     "views/editor",
     "views/preview"
-], function(hr, Q, dialogs, Grid, Summary, Editor, Preview) {
+], function(hr, Q, dialogs, Article, Grid, Summary, Editor, Preview) {
     var Book = hr.View.extend({
         className: "book",
         defaults: {
@@ -41,6 +42,8 @@ define([
             this.preview = new Preview({}, this);
             this.preview.update();
             this.grid.addView(this.preview);
+
+            this.openReadme();
         },
 
         /*
@@ -71,6 +74,16 @@ define([
             }
 
             return doOpen();
+        },
+
+        /*
+         * Show introduction
+         */
+        openReadme: function() {
+            return this.openArticle(new Article({}, {
+                title: "Introduction",
+                path: "README.md"
+            }));
         },
 
         // Read/Write article in this fs

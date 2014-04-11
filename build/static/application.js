@@ -25562,7 +25562,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397203413535,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397203843753,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -26275,6 +26275,36 @@ define('utils/dialogs',[
 
     return Dialogs;
 });
+define('models/article',[
+    "hr/hr"
+], function(hr) {
+    var Article = hr.Model.extend({
+        defaults: {
+            title: null,
+            path: null,
+            level: "1",
+            articles: []
+        },
+
+        initialize: function() {
+            Article.__super__.initialize.apply(this, arguments);
+
+            var Articles = require("collections/articles");
+
+            this.articles = new Articles({});
+            this.articles.reset(this.get("articles"));
+
+            this.on("change:articles", function() {
+                this.articles.reset(this.get("articles"));
+            }, this);
+            this.listenTo(this.articles, "add change remove reset", function() {
+                this.set("articles", this.articles.toJSON(), {silent: true});
+            });
+        }
+    });
+
+    return Article;
+});
 define('utils/dragdrop',[
     'hr/utils',
     'hr/hr',
@@ -26832,36 +26862,6 @@ define('views/grid',[
     });
 
     return GridView;
-});
-define('models/article',[
-    "hr/hr"
-], function(hr) {
-    var Article = hr.Model.extend({
-        defaults: {
-            title: null,
-            path: null,
-            level: "1",
-            articles: []
-        },
-
-        initialize: function() {
-            Article.__super__.initialize.apply(this, arguments);
-
-            var Articles = require("collections/articles");
-
-            this.articles = new Articles({});
-            this.articles.reset(this.get("articles"));
-
-            this.on("change:articles", function() {
-                this.articles.reset(this.get("articles"));
-            }, this);
-            this.listenTo(this.articles, "add change remove reset", function() {
-                this.set("articles", this.articles.toJSON(), {silent: true});
-            });
-        }
-    });
-
-    return Article;
 });
 define('collections/articles',[
     "hr/hr",
@@ -44897,11 +44897,12 @@ define('views/book',[
     "hr/hr",
     "hr/promise",
     "utils/dialogs",
+    "models/article",
     "views/grid",
     "views/summary",
     "views/editor",
     "views/preview"
-], function(hr, Q, dialogs, Grid, Summary, Editor, Preview) {
+], function(hr, Q, dialogs, Article, Grid, Summary, Editor, Preview) {
     var Book = hr.View.extend({
         className: "book",
         defaults: {
@@ -44936,6 +44937,8 @@ define('views/book',[
             this.preview = new Preview({}, this);
             this.preview.update();
             this.grid.addView(this.preview);
+
+            this.openReadme();
         },
 
         /*
@@ -44966,6 +44969,16 @@ define('views/book',[
             }
 
             return doOpen();
+        },
+
+        /*
+         * Show introduction
+         */
+        openReadme: function() {
+            return this.openArticle(new Article({}, {
+                title: "Introduction",
+                path: "README.md"
+            }));
         },
 
         // Read/Write article in this fs
