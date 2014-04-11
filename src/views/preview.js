@@ -9,7 +9,7 @@ define([
     var parse = node.require("gitbook").parse;
 
     var Preview = hr.View.extend({
-        className: "preview",
+        className: "book-section preview",
         template: templateFile,
 
         initialize: function() {

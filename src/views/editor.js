@@ -1,25 +1,27 @@
 define([
     "hr/hr",
     "hr/dom",
-    "ace"
-], function(hr, $, ace) {
+    "ace",
+    "text!resources/templates/editor.html"
+], function(hr, $, ace, templateFile) {
     var aceconfig = ace.require("ace/config");
     aceconfig.set("basePath", "static/ace");
 
     var Editor = hr.View.extend({
-        className: "editor",
+        className: "book-section editor",
+        template: templateFile,
 
         initialize: function() {
             Editor.__super__.initialize.apply(this, arguments);
 
             this.book = this.parent;
 
-            this.$inner = $("<div>", {'class': "inner"});
-            this.$inner.appendTo(this.$el);
+            this.$editor = $("<div>", {'class': "editor"});
+            this.$editor.appendTo(this.$el);
 
             this.ignoreChange = false;
 
-            this.editor = ace.edit(this.$inner.get(0));
+            this.editor = ace.edit(this.$editor.get(0));
 
             this.editor.on("change", function() {
                 if (this.ignoreChange || !this.book.currentArticle) return;
@@ -38,6 +40,11 @@ define([
             this.editor.setHighlightActiveLine(false);
 
             this.listenTo(this.book, "article:open", this.onArticleChange);
+        },
+
+        finish: function() {
+            this.$editor.appendTo(this.$(".inner"));
+            return Editor.__super__.finish.apply(this, arguments);
         },
 
         onArticleChange: function(article) {

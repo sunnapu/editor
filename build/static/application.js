@@ -25562,7 +25562,7 @@ Logger, Requests, Urls, Storage, Cache, Cookies, Template, Resources, Offline, B
     
     return hr;
 });
-define('hr/args',[],function() { return {"revision":1397174921399,"baseUrl":"/"}; });
+define('hr/args',[],function() { return {"revision":1397202972029,"baseUrl":"/"}; });
 define('models/file',[
     "hr/hr"
 ], function(hr) {
@@ -44749,28 +44749,32 @@ define("ace", (function (global) {
     };
 }(this)));
 
+define('text!resources/templates/editor.html',[],function () { return '<div class="toolbar">\n    <div class="btn-toolbar" role="toolbar" style="margin: 0;">\n        <div class="btn-group">\n            <button type="button" class="btn btn-default action-save"><i class="fa fa-save"></i></button>\n        </div>\n        <div class="btn-group">\n            <button type="button" class="btn btn-default action-text-bold"><i class="fa fa-bold"></i></button>\n            <button type="button" class="btn btn-default action-text-italic"><i class="fa fa-italic"></i></button>\n            <button type="button" class="btn btn-default action-text-underline"><i class="fa fa-underline"></i></button>\n        </div>\n        <div class="btn-group">\n            <button type="button" class="btn btn-default action-text-title-1">H1</button>\n            <button type="button" class="btn btn-default action-text-title-2">H2</button>\n            <button type="button" class="btn btn-default action-text-title-3">H3</button>\n            <button type="button" class="btn btn-default action-text-title-4">H4</button>\n        </div>\n        <div class="btn-group">\n            <button type="button" class="btn btn-default action-text-list-ul"><i class="fa fa-list-ul"></i></button>\n            <button type="button" class="btn btn-default action-text-list-ol"><i class="fa fa-list-ol"></i></button>\n            <button type="button" class="btn btn-default action-text-table"><i class="fa fa-table"></i></button>\n        </div>\n        <div class="btn-group">\n            <button type="button" class="btn btn-default action-text-link"><i class="fa fa-chain"></i></button>\n            <button type="button" class="btn btn-default action-text-image"><i class="fa fa-picture-o"></i></button>\n        </div>\n    </div>\n</div>\n<div class="inner"></div>';});
+
 define('views/editor',[
     "hr/hr",
     "hr/dom",
-    "ace"
-], function(hr, $, ace) {
+    "ace",
+    "text!resources/templates/editor.html"
+], function(hr, $, ace, templateFile) {
     var aceconfig = ace.require("ace/config");
     aceconfig.set("basePath", "static/ace");
 
     var Editor = hr.View.extend({
-        className: "editor",
+        className: "book-section editor",
+        template: templateFile,
 
         initialize: function() {
             Editor.__super__.initialize.apply(this, arguments);
 
             this.book = this.parent;
 
-            this.$inner = $("<div>", {'class': "inner"});
-            this.$inner.appendTo(this.$el);
+            this.$editor = $("<div>", {'class': "editor"});
+            this.$editor.appendTo(this.$el);
 
             this.ignoreChange = false;
 
-            this.editor = ace.edit(this.$inner.get(0));
+            this.editor = ace.edit(this.$editor.get(0));
 
             this.editor.on("change", function() {
                 if (this.ignoreChange || !this.book.currentArticle) return;
@@ -44789,6 +44793,11 @@ define('views/editor',[
             this.editor.setHighlightActiveLine(false);
 
             this.listenTo(this.book, "article:open", this.onArticleChange);
+        },
+
+        finish: function() {
+            this.$editor.appendTo(this.$(".inner"));
+            return Editor.__super__.finish.apply(this, arguments);
         },
 
         onArticleChange: function(article) {
@@ -44819,7 +44828,7 @@ define('views/preview',[
     var parse = node.require("gitbook").parse;
 
     var Preview = hr.View.extend({
-        className: "preview",
+        className: "book-section preview",
         template: templateFile,
 
         initialize: function() {
