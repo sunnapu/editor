@@ -1,9 +1,8 @@
 define([
     "hr/hr",
     "hr/promise",
-    "hr/utils",
-    "models/file"
-], function(hr, Q, _, File) {
+    "hr/utils"
+], function(hr, Q, _) {
     var fs = node.require("fs");
     var path = node.require("path");
 
@@ -37,13 +36,11 @@ define([
 
                         return Q.nfcall(fs.stat, f_path)
                         .then(function(_stat) {
-                            return new File({
-                                fs: that,
-                            }, {
+                            return {
                                 'path': that.virtualPath(f_path),
                                 'name': file,
                                 'type': _stat.isDirectory() ? File.TYPE.DIRECTORY : File.TYPE.FILE
-                            });
+                            };
                         });
                     })
                     .value()
