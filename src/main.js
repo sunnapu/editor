@@ -24,15 +24,43 @@ require([
         metas: {},
         links: {},
         events: {
-            "click .open-local": "onOpenLocal",
             "change .local-file-selector": "onLocalSelectionChange"
         },
 
         initialize: function() {
             Application.__super__.initialize.apply(this, arguments);
 
+            var that = this;
+
             this.editor = null;
             this.book = null;
+
+            var gui = node.gui;
+
+            var menu = new gui.Menu({ type: 'menubar' });
+
+            var fileMenu = new node.gui.Menu();
+            fileMenu.append(new gui.MenuItem({
+                label: 'Open',
+                click: function () {
+                    that.openFolderSelection();
+                }
+            }));
+            fileMenu.append(new gui.MenuItem({
+                type: 'separator'
+            }));
+            fileMenu.append(new gui.MenuItem({
+                label: 'Close',
+                click: function () {
+                    gui.Window.get().close();
+                }
+            }));
+
+            menu.append(new gui.MenuItem({
+                label: 'File',
+                submenu: fileMenu
+            }));
+            gui.Window.get().menu = menu;
         },
 
         render: function() {
@@ -65,8 +93,8 @@ require([
         },
 
         // Click to select a new local folder
-        onOpenLocal: function(e) {
-            e.preventDefault();
+        openFolderSelection: function(e) {
+            if (e) e.preventDefault();
 
             this.$(".local-file-selector").click();
         },
