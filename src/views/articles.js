@@ -3,21 +3,19 @@ define([
     "utils/dragdrop",
     "utils/dialogs",
     "collections/articles",
-    "text!resources/templates/article.html"
+    "text!resources/templates/article.html",
+    "utils/dblclick"
 ], function(hr, dnd, dialogs, Articles, templateFile) {
+    var articlesGlobal = new hr.Class();
 
     var ArticleItem = hr.List.Item.extend({
         className: "article",
         template: templateFile,
         events: {
-            "click > .chapter-title": "open",
-            "dblclick": "toggleEdit",
-            
             "click > .chapter-actions .action-add": "addChapter",
 
             "change > input": "onChangeTitle",
-            "keyup > input": "onKeyUp",
-            "click > input": function(e) { e.stopPropagation(); }
+            "keyup > input": "onKeyUp"
         },
 
         initialize: function() {
@@ -27,6 +25,10 @@ define([
             this.articles = new ArticlesView({collection: this.model.articles}, this.list.parent);
             this.summary = this.list.parent;
             this.editor = this.summary.parent;
+
+            this.listenTo(articlesGlobal, "mode:edit", function(_art) {
+                if (_art.cid != this.cid) this.toggleEdit(false);
+            });
             
 
             // Drop tabs to order
@@ -64,6 +66,9 @@ define([
 
         finish: function() {
             this.articles.appendTo(this.$(".chapter-articles"));
+
+            this.$("> .chapter-title").singleDblClick(this.open.bind(this), this.toggleEdit.bind(this));
+
             return ArticleItem.__super__.finish.apply(this, arguments);
         },
 
@@ -90,6 +95,7 @@ define([
 
             this.$el.toggleClass("mode-edit", e);
             if (this.$el.hasClass("mode-edit")) {
+                articlesGlobal.trigger("mode:edit", this);
                 $input.focus();
             } else {
                 $input.blur();
