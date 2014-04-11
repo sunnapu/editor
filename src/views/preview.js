@@ -18,7 +18,8 @@ define([
             this.book = this.parent;
             this.sections = [];
 
-            this.listenTo(this.book, "article", this.onArticleChange);
+            this.listenTo(this.book, "article:open", this.onArticleChange);
+            this.listenTo(this.book, "article:write", _.debounce(this.onArticleChange, 150));
         },
 
         templateContext: function() {
