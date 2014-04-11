@@ -57,6 +57,35 @@ require([
                 }
             }));
 
+            var bookMenu = new node.gui.Menu();
+            bookMenu.append(new gui.MenuItem({
+                label: 'Preview Website',
+                click: function () {
+                    
+                }
+            }));
+            bookMenu.append(new gui.MenuItem({
+                type: 'separator'
+            }));
+            bookMenu.append(new gui.MenuItem({
+                label: 'Build Website',
+                click: function () {
+                    
+                }
+            }));
+            bookMenu.append(new gui.MenuItem({
+                label: 'Build PDF',
+                click: function () {
+                    
+                }
+            }));
+            bookMenu.append(new gui.MenuItem({
+                label: 'Build eBook',
+                click: function () {
+                    
+                }
+            }));
+
             var devMenu = new node.gui.Menu();
             devMenu.append(new gui.MenuItem({
                 label: 'Open Tools',
@@ -80,9 +109,15 @@ require([
                 }
             }));
 
-            menu.append(new gui.MenuItem({
+            gui.Window.get().menu = menu;
+
+            menu.insert(new gui.MenuItem({
                 label: 'File',
                 submenu: fileMenu
+            }), 1);
+            menu.append(new gui.MenuItem({
+                label: 'Book',
+                submenu: bookMenu
             }));
             menu.append(new gui.MenuItem({
                 label: 'Develop',
@@ -92,7 +127,7 @@ require([
                 label: 'Help',
                 submenu: helpMenu
             }));
-            gui.Window.get().menu = menu;
+            
         },
 
         render: function() {
