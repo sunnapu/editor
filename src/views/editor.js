@@ -2,8 +2,9 @@ define([
     "hr/hr",
     "hr/dom",
     "ace",
+    "utils/dialogs",
     "text!resources/templates/editor.html"
-], function(hr, $, ace, templateFile) {
+], function(hr, $, ace, dialogs, templateFile) {
     var aceconfig = ace.require("ace/config");
     aceconfig.set("basePath", "static/ace");
 
@@ -21,13 +22,83 @@ define([
         };
     };
 
+    var textInteractiveAction = function(title, fields, getter) {
+        return function() {
+            var that = this;
+
+            dialogs.fields(title, fields)
+            .then(getter.bind(this))
+            .then(function(o) {
+                return textAction(o[0], o[1]).call(that);
+            })
+            .fail(function(err) {
+                console.error(err);
+            })
+        };
+    };
+
 
     var Editor = hr.View.extend({
         className: "book-section editor",
         template: templateFile,
         events: {
             "click .action-save": "doSave",
-            "click .action-text-bold": textAction("**", "**")
+            "click .action-text-bold": textAction("**", "**"),
+            "click .action-text-italic": textAction("*", "*"),
+            "click .action-text-strikethrough": textAction("~~", "~~"),
+            "click .action-text-title-1": textAction("# ", "\n"),
+            "click .action-text-title-2": textAction("## ", "\n"),
+            "click .action-text-title-3": textAction("### ", "\n"),
+            "click .action-text-title-4": textAction("#### ", "\n"),
+            "click .action-text-list-ul": textAction("* ", "\n"),
+            "click .action-text-list-ol": textAction("1. ", "\n"),
+            "click .action-text-code": textAction("```\n", "```\n"),
+            "click .action-text-table": textInteractiveAction("Add a table", {
+                "rows": {
+                    'label': "Rows",
+                    'type': "number",
+                    'default': 2
+                },
+                "columns": {
+                    'label': "Columns",
+                    'type': "number",
+                    'default': 2
+                }
+            }, function(info) {
+                var before = "";
+                var after = "";
+
+                for (var y = 0; y <= info.rows; y++) {
+                    var line = "|";
+
+                    for (var x = 0; x < info.columns; x++) {
+                        line = line + (y == 1 ? " -- |": " "+x+":"+y+" |");
+                    } 
+
+                    before = before+line+"\n";
+                }
+
+                return [after, before]
+            }),
+            "click .action-text-link": textInteractiveAction("Add a link", {
+                "href": {
+                    'label': "Link",
+                    'type': "text",
+                    'default': "http://"
+                }
+            }, function(info) {
+                return ["[", "]("+info.href+")"];
+            }),
+            "click .action-text-image": textInteractiveAction("Add an image", {
+                "href": {
+                    'label': "Link",
+                    'type': "text",
+                    'default': "http://"
+                }
+            }, function(info) {
+                return ["![", "]("+info.href+")"];
+            }),
+            "click .action-help": "doOpenHelp"
         },
 
         initialize: function() {
@@ -91,6 +162,11 @@ define([
         doSave: function(e) {
             if (e) e.preventDefault();
             this.book.saveArticle(this.book.currentArticle);
+        },
+
+        // Open the help about markdown
+        doOpenHelp: function() {
+            node.gui.Shell.openExternal("https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet");
         }
     });
 
