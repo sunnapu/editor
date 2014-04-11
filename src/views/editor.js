@@ -10,6 +10,9 @@ define([
     var Editor = hr.View.extend({
         className: "book-section editor",
         template: templateFile,
+        events: {
+            "click .action-save": "doSave"
+        },
 
         initialize: function() {
             Editor.__super__.initialize.apply(this, arguments);
@@ -66,6 +69,12 @@ define([
         onArticleState: function(article, state) {
             this.$(".action-save").toggleClass("disabled", state);
             this.$(".action-save").toggleClass("btn-warning", !state);
+        },
+
+        // Save the article
+        doSave: function(e) {
+            if (e) e.preventDefault();
+            this.book.saveArticle(this.book.currentArticle);
         }
     });
 
