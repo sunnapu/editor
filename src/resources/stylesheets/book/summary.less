@@ -8,6 +8,20 @@
         margin: 0px;
         margin-bottom: 15px;
         font-size: 20px;
+        color: @summary-color;
+    }
+
+    hr {
+        border-color: @summary-color;
+    }
+
+    .inner {
+        position: absolute;
+        top: 50px;
+        bottom: 0px;
+        right: 0px;
+        left: 0px;
+        overflow-y: auto;
     }
 
     .trash {
@@ -17,14 +31,27 @@
         right: 8px;
         left: 8px;
 
+        display: none;
+
         padding: 10px;
         text-align: center;
-        border: 2px dashed @book-color;
+        color: @summary-color;
+        border: 2px dashed @summary-color;
 
         .transition(border-color 400ms ease);
 
         &.dragover {
-            border-color: darken(@book-color, 20%);
+            border-color: darken(@summary-color, 20%);
+        }
+    }
+
+    &.with-trash {
+        .inner {
+            bottom: 60px;
+        }
+
+        .trash {
+            display: block;
         }
     }
 
@@ -64,6 +91,11 @@
             .chapter-title {
                 padding: 8px 10px;
                 display: block;
+
+                &:hover {
+                    background: rgba(0,0,0,0.02);
+                    border-radius: 3px;
+                }
             }
 
             input {
@@ -95,7 +127,7 @@
             .chapter-actions {
                 position:absolute;
 
-                right: 0px;
+                right: 6px;
                 top: 0px;
                 height: 36px;
                 z-index: 1;
@@ -105,7 +137,7 @@
                 .transition(opacity 300ms ease);
 
                 .action {
-                    color: inherit;
+                    color: @summary-color;
                     .opacity(0.6);
                     margin: 0px 2px;
 

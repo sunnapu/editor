@@ -10,10 +10,10 @@ define([
         className: "article",
         template: templateFile,
         events: {
-            "click": "open",
+            "click > .chapter-title": "open",
             "dblclick": "toggleEdit",
             
-            "click .action-add": "addChapter",
+            "click > .chapter-actions .action-add": "addChapter",
 
             "change > input": "onChangeTitle",
             "keyup > input": "onKeyUp",

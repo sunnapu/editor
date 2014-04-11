@@ -12,7 +12,6 @@ define([
 
             this.summary = this.parent;
 
-            this.$el.hide();
             this.$el.html('<i class="fa fa-trash-o"></i> Remove');
 
             // Drop tabs to order
@@ -37,10 +36,10 @@ define([
             // Drag and drop of tabs
             this.drag = new dnd.DraggableType();
             this.listenTo(this.drag, "drag:start", function() {
-                this.trash.$el.show();
+                this.$el.toggleClass("with-trash", true);
             });
             this.listenTo(this.drag, "drag:end", function() {
-                this.trash.$el.hide();
+                this.$el.toggleClass("with-trash", false);
             });
 
             // Trash
