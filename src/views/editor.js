@@ -41,6 +41,7 @@ define([
             this.editor.setHighlightActiveLine(false);
 
             this.listenTo(this.book, "article:open", this.onArticleChange);
+            this.listenTo(this.book, "article:state", this.onArticleState);
         },
 
         finish: function() {
@@ -48,6 +49,7 @@ define([
             return Editor.__super__.finish.apply(this, arguments);
         },
 
+        // When the user opens another article
         onArticleChange: function(article) {
             var that = this;
 
@@ -58,6 +60,12 @@ define([
                 that.editor.gotoLine(0);
                 that.ignoreChange = false;
             });
+        },
+
+        // When the state of the current article change
+        onArticleState: function(article, state) {
+            this.$(".action-save").toggleClass("disabled", state);
+            this.$(".action-save").toggleClass("btn-warning", !state);
         }
     });
 

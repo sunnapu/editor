@@ -55,6 +55,7 @@ define([
             var doOpen = function() {
                 that.currentArticle = article;
                 that.trigger("article:open", article);
+                that.triggerArticleState(article);
 
                 return Q();
             };
@@ -91,26 +92,43 @@ define([
             var that = this;
             var path = article.get("path");
 
-            if (this.articles[path]) return Q(this.articles[path]);
+            if (this.articles[path]) return Q(this.articles[path].content);
 
             return this.fs.read(path)
             .then(function(content) {
-                that.articles[path] = content;
+                that.articles[path] = {
+                    content: content,
+                    saved: true
+                };
                 return content;
             });
         },
         writeArticle: function(article, content) {
             var path = article.get("path");
 
-            this.articles[path] = content;
+            this.articles[path] = this.articles[path] || {};
+            this.articles[path].saved = false;
+            this.articles[path].content = content;
+
             this.trigger("article:write", article);
+            this.triggerArticleState(article);
 
             return Q();
         },
-        saveArticle: function(article, content) {
+        saveArticle: function(article) {
+            var that = this;
             var path = article.get("path");
             if (!this.articles[path]) return Q.reject(new Error("No content to save for this article"));
-            return this.fs.write(article.get("path"), content);
+
+            return this.fs.write(article.get("path"), this.articles[path].content)
+            .then(function() {
+                that.articles[path].saved = true;
+                that.triggerArticleState(article);
+            });
+        },
+        triggerArticleState: function(article) {
+            var path = article.get("path");
+            this.trigger("article:state", article, this.articles[path]? this.articles[path].saved : false);
         }
     });
 
