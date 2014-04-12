@@ -7,6 +7,9 @@ define([
     var path = node.require("path");
 
     var LocalFs = hr.Class.extend({
+        isValidPath: function(_path) {
+            return _path.indexOf(this.options.base) === 0;
+        },
         virtualPath: function(_path) {
             return path.relative(this.options.base, _path);
         },

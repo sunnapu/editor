@@ -141,6 +141,43 @@ define([
                 "message": message,
                 "dialog": "alert"
             });
+        },
+
+        /**
+         * Save as
+         *  
+         * @param {string} base name
+         */
+        saveAs: function(path, basePath) {
+            var that = this;
+            var d = Q.defer();
+
+            var $f = $("input.local-file-saveas");
+            if ($f.length == 0) {
+                var $f = $("<input>", {
+                    "type": "file",
+                    "class": "local-file-saveas"
+                });
+                $f.appendTo($("body"));
+            }
+
+            $f.hide();
+
+            $f.prop("nwsaveas", path);
+            if (basePath) $f.prop("nwworkingdir", basePath);
+
+            // Create file element for selection
+            $f.one("change", function(e) {
+                e.preventDefault();
+
+                d.resolve($f.val());
+
+                $f.remove();
+            });
+
+            $f.trigger('click');
+
+            return d.promise;
         }
     };
 

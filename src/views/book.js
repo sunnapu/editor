@@ -65,16 +65,29 @@ define([
             };
 
             if (!article.get("path")) {
-                return dialogs.prompt("Enter filename for this chapter:", "", article.get("title")+".md")
+                return dialogs.saveAs(article.get("title")+".md", that.fs.options.base)
                 .then(function(path) {
+                    if (!that.fs.isValidPath(path)) return Q.reject(new Error("Invalid path for saving this article, need to be on the book repository."));
+                    path = that.fs.virtualPath(path);
                     article.set("path", path);
+                })
+                // Write article
+                .then(function() {
                     return that.writeArticle(article, "#"+article.get("title")+"\n")
                 })
+                // Save the article
                 .then(function() {
                     return that.saveArticle(article);
                 })
+                // Save summary
+                .then(function() {
+                    return that.summary.save();
+                })
                 .then(function() {
                     return doOpen();
+                })
+                .fail(function(err) {
+                    dialogs.alert("Error", err.message || err);
                 });
             }
 
