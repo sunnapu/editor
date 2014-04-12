@@ -57,6 +57,10 @@ define([
                 that.trigger("article:open", article);
                 that.triggerArticleState(article);
 
+                that.$("*[data-article]").each(function() {
+                    $(this).toggleClass("active", $(this).data("article") == article.get("path"));
+                });
+
                 return Q();
             };
 

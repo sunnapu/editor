@@ -51,6 +51,7 @@ define([
 
         render: function() {
             this.articles.collection.reset(this.model.get("articles", []));
+            if (this.model.get("path")) this.$el.attr("data-article", this.model.get("path"));
             return ArticleItem.__super__.render.apply(this, arguments);
         },
 
