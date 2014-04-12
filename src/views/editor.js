@@ -129,6 +129,7 @@ define([
             this.editor.setOption("showGutter", false);
             this.editor.setShowPrintMargin(false);
             this.editor.setHighlightActiveLine(false);
+            this.editor.session.setUseWrapMode(true);
 
             this.listenTo(this.book, "article:open", this.onArticleChange);
             this.listenTo(this.book, "article:state", this.onArticleState);
