@@ -73,11 +73,16 @@
             border-bottom: 2px solid transparent;
             cursor: pointer;
             background: @book-background;
+            border-left: 2px solid transparent;
 
             &.active {
                 > .chapter-title, > .chapter-title:hover {
                     background: rgba(196, 205, 212, 0.35);
                 }
+            }
+
+            &.modified {
+                border-left-color: @brand-warning;
             }
 
             &.move,

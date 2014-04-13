@@ -57,9 +57,7 @@ define([
                 that.trigger("article:open", article);
                 that.triggerArticleState(article);
 
-                that.$("*[data-article]").each(function() {
-                    $(this).toggleClass("active", $(this).data("article") == article.get("path"));
-                });
+                that.toggleArticlesClass("active", article);
 
                 return Q();
             };
@@ -145,12 +143,23 @@ define([
         },
         triggerArticleState: function(article) {
             var path = article.get("path");
-            this.trigger("article:state", article, this.articles[path]? this.articles[path].saved : false);
+            var st = this.articles[path]? this.articles[path].saved : true;
+            
+            this.trigger("article:state", article, st);
+            this.toggleArticleClass(article, "modified", !st);
         },
         getArticleState: function(article) {
             article = article || this.currentArticle;
             var path = article.get("path");
             return this.articles[path];
+        },
+        toggleArticleClass: function(article, className, st) {
+            this.$("*[data-article='"+article.get("path")+"']").toggleClass(className, st);
+        },
+        toggleArticlesClass: function(article, className) {
+            this.$("*[data-article]").each(function() {
+                $(this).toggleClass(className, $(this).data("article") == article.get("path"));
+            });
         }
     });
 
