@@ -65,14 +65,19 @@
         list-style: none;
 
         .article {
+            margin: 0px;
+            padding: 0px;
+            
             position: relative;
             border-top: 2px solid transparent;
             border-bottom: 2px solid transparent;
             cursor: pointer;
+            background: @book-background;
 
             &.active {
-                /*background: @brand-success;
-                color: #fff;*/
+                > .chapter-title, > .chapter-title:hover {
+                    background: rgba(196, 205, 212, 0.35);
+                }
             }
 
             &.move,
@@ -102,13 +107,8 @@
                 display: block;
 
                 &:hover {
-                    background: rgba(0,0,0,0.02);
-                    border-radius: 3px;
+                    background: rgba(196, 205, 212, 0.2);
                 }
-            }
-
-            .chapter-articles {
-                margin-left: 16px;
             }
 
             .chapter-actions {

@@ -58,6 +58,7 @@ define([
         finish: function() {
             this.articles.appendTo(this.$(".chapter-articles"));
 
+            this.$("> .chapter-title").css("paddingLeft", (4+(this.model.get("level").length)*8)+"px");
             this.$("> .chapter-title").singleDblClick(this.open.bind(this), this.changeTitle.bind(this));
 
             return ArticleItem.__super__.finish.apply(this, arguments);
