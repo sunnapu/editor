@@ -29,6 +29,9 @@ define([
     var Summary = hr.View.extend({
         className: "summary",
         template: templateFile,
+        events: {
+            "click .open-readme": "openReadme"
+        },
 
         initialize: function() {
             Summary.__super__.initialize.apply(this, arguments);
@@ -81,6 +84,14 @@ define([
             .then(function() {
                 return that.load();
             });
+        },
+
+        /*
+         * Open README.md introduction
+         */
+        openReadme: function(e) {
+            if (e) e.preventDefault();
+            this.parent.openReadme();
         }
     });
 
