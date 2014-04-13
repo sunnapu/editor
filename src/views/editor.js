@@ -142,6 +142,11 @@ define([
                 readOnly: false
             });
 
+            this.on("grid:layout", function() {
+                this.editor.resize();
+                this.editor.renderer.updateFull();
+            }, this);
+
             this.listenTo(this.book, "article:open", this.onArticleChange);
             this.listenTo(this.book, "article:state", this.onArticleState);
         },
