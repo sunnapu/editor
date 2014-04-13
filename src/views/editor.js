@@ -130,6 +130,17 @@ define([
             this.editor.setShowPrintMargin(false);
             this.editor.setHighlightActiveLine(false);
             this.editor.session.setUseWrapMode(true);
+            this.editor.commands.addCommand({
+                name: 'save',
+                bindKey: {
+                    win: 'Ctrl-S',
+                    mac: 'Command-S'
+                },
+                exec: function(editor) {
+                    this.doSave(); 
+                }.bind(this),
+                readOnly: false
+            });
 
             this.listenTo(this.book, "article:open", this.onArticleChange);
             this.listenTo(this.book, "article:state", this.onArticleState);
