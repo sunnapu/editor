@@ -3,10 +3,10 @@ require([
     "hr/dom",
     "hr/hr",
     "hr/args",
+    "utils/dialogs",
     "core/fs",
-    "views/book",
-    "text!resources/templates/main.html"
-], function(_, $, hr, args, Fs, Book, templateFile) {
+    "views/book"
+], function(_, $, hr, args, dialogs, Fs, Book) {
     var path = node.require("path");
     var gui = node.gui;
     var __dirname = node.require("../src/dirname");
@@ -21,12 +21,9 @@ require([
     // Define base application
     var Application = hr.Application.extend({
         name: "GitBook Editor",
-        template: templateFile,
         metas: {},
         links: {},
-        events: {
-            "change .local-file-selector": "onLocalSelectionChange"
-        },
+        events: {},
 
         initialize: function() {
             Application.__super__.initialize.apply(this, arguments);
@@ -35,8 +32,6 @@ require([
 
             this.editor = null;
             this.book = null;
-
-            
 
             var menu = new gui.Menu({ type: 'menubar' });
 
@@ -132,14 +127,11 @@ require([
 
         render: function() {
             gui.Window.get().show();
-
-            if (this.book) this.book.detach();
-            return Application.__super__.render.apply(this, arguments);
+            return this.ready();
         },
 
         finish: function() {
-            if (this.book) this.book.appendTo(this);
-            else this.openPath(path.join(__dirname, "../intro"));
+            if (!this.book) this.openPath(path.join(__dirname, "../intro"));
             return Application.__super__.finish.apply(this, arguments);
         },
 
@@ -162,18 +154,13 @@ require([
         },
 
         // Click to select a new local folder
-        openFolderSelection: function(e) {
-            if (e) e.preventDefault();
+        openFolderSelection: function() {
+            var that = this;
 
-            this.$(".local-file-selector").click();
-        },
-
-        // Local file selector change
-        onLocalSelectionChange: function(e) {
-            var _path = this.$(".local-file-selector").val();
-            if (!_path) return;
-
-            this.openPath(_path);
+            dialogs.folder()
+            .then(function(_path) {
+                that.openPath(_path);
+            });
         }
     });
 

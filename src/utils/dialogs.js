@@ -144,33 +144,34 @@ define([
         },
 
         /**
-         * Save as
+         * File dialog
          *  
          * @param {string} base name
          */
-        saveAs: function(path, basePath) {
+        file: function(props) {
             var that = this;
             var d = Q.defer();
 
-            var $f = $("input.local-file-saveas");
-            if ($f.length == 0) {
-                var $f = $("<input>", {
-                    "type": "file",
-                    "class": "local-file-saveas"
-                });
-                $f.appendTo($("body"));
-            }
+            var $f = $("input.file-dialog");
+            if ($f.length > 0) $f.remove();
 
+            $f = $("<input>", {
+                "type": "file",
+                "class": "file-dialog"
+            });
+            $f.appendTo($("body"));
             $f.hide();
 
-            $f.prop("nwsaveas", path);
-            if (basePath) $f.prop("nwworkingdir", basePath);
+            $f.prop(props);
 
             // Create file element for selection
             $f.one("change", function(e) {
                 e.preventDefault();
 
-                d.resolve($f.val());
+                var _path = $f.val();
+
+                if (_path) d.resolve(_path);
+                else d.reject(new Error("No file selected"));
 
                 $f.remove();
             });
@@ -178,6 +179,27 @@ define([
             $f.trigger('click');
 
             return d.promise;
+        },
+
+        /**
+         * Save as
+         *  
+         * @param {string} base name
+         */
+        saveAs: function(path, basePath) {
+            return Dialogs.file({
+                nwsaveas: path,
+                nwworkingdir: basePath
+            });
+        },
+
+        /**
+         * Open folder selection
+         */
+        folder: function() {
+            return Dialogs.file({
+                nwdirectory: true
+            });
         }
     };
 
