@@ -157,6 +157,9 @@ define([
 
             this.book.readArticle(article)
             .then(function(content) {
+                var state = that.book.getArticleState(article);
+                that.onArticleState(article, state.saved);
+
                 that.ignoreChange = true;
                 that.editor.setValue(content);
                 that.editor.gotoLine(0);
@@ -166,6 +169,7 @@ define([
 
         // When the state of the current article change
         onArticleState: function(article, state) {
+            if (article.get("path") != this.book.currentArticle.get("path")) return;
             this.$(".action-save").toggleClass("disabled", state);
             this.$(".action-save").toggleClass("btn-warning", !state);
         },

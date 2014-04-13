@@ -146,6 +146,11 @@ define([
         triggerArticleState: function(article) {
             var path = article.get("path");
             this.trigger("article:state", article, this.articles[path]? this.articles[path].saved : false);
+        },
+        getArticleState: function(article) {
+            article = article || this.currentArticle;
+            var path = article.get("path");
+            return this.articles[path];
         }
     });
 
