@@ -69,11 +69,8 @@
             padding: 0px;
             
             position: relative;
-            border-top: 2px solid transparent;
-            border-bottom: 2px solid transparent;
             cursor: pointer;
             background: @book-background;
-            border-left: 2px solid transparent;
 
             &.active {
                 > .chapter-title, > .chapter-title:hover {
@@ -82,7 +79,9 @@
             }
 
             &.modified {
-                border-left-color: @brand-warning;
+                > .chapter-title {
+                    border-color: @brand-warning !important;
+                }
             }
 
             &.move,
@@ -110,6 +109,7 @@
             .chapter-title {
                 padding: 8px 10px;
                 display: block;
+                border-left: 4px solid transparent;
 
                 &:hover {
                     background: rgba(196, 205, 212, 0.2);
