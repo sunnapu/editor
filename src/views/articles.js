@@ -93,7 +93,7 @@ define([
                 e.stopPropagation();
             }
 
-            dialogs.prompt("Add new article", "Enter a title for the new article", "Article")
+            dialogs.prompt("Add New Article", "Enter a title for the new article", "Article")
             .then(function(title) {
                 that.model.articles.add({'title': title});
                 that.summary.save();

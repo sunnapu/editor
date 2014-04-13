@@ -1,9 +1,10 @@
 define([
     "hr/hr",
     "utils/dragdrop",
+    "utils/dialogs",
     "views/articles",
     "text!resources/templates/summary.html"
-], function(hr, dnd, ArticlesView, templateFile) {
+], function(hr, dnd, dialogs, ArticlesView, templateFile) {
     var SummaryTrash = hr.View.extend({
         className: "trash",
         initialize: function() {
@@ -30,6 +31,7 @@ define([
         className: "summary",
         template: templateFile,
         events: {
+            "click .add-chapter": "addChapter",
             "click .open-readme": "openReadme"
         },
 
@@ -83,6 +85,20 @@ define([
             return this.parent.fs.write("SUMMARY.md", this.articles.collection.toMarkdown())
             .then(function() {
                 return that.load();
+            });
+        },
+
+        /*
+         * Add a new main chapter
+         */
+        addChapter: function(e) {
+            var that = this;
+            if (e) e.preventDefault();
+
+            dialogs.prompt("Add New Chapter", "Enter a title for the new chapter", "Chapter")
+            .then(function(title) {
+                that.articles.collection.add({'title': title});
+                that.save();
             });
         },
 
