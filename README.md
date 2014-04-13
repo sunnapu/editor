@@ -1,6 +1,6 @@
 # GitBook Editor
 
-### Work in progress!
+### This is a work in progress! No releases yet.
 
 ![Image](https://raw.github.com/GitbookIO/editor/master/preview.png)
 
