@@ -117,7 +117,7 @@ define([
                 that.trigger("article:open", article);
                 that.triggerArticleState(article);
 
-                that.toggleArticlesClass("active", article);
+                that.toggleArticlesClass(article, "active");
 
                 return Q();
             };
