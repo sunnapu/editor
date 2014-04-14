@@ -9,11 +9,12 @@ define([
     var runningServer = null;
 
     var stopServer = function() {
-        if (!runningServer) return Q.reject(new Error("No server to stop"));
+        if (!runningServer) return Q();
 
         var d = Q.defer();
 
         runningServer.close(function(err) {
+            runningServer = null;
             if (err) d.reject(err);
             else d.resolve();
         });

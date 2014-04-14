@@ -55,7 +55,7 @@ define([
         buildBook: function(params, options) {
             var that = this;
 
-            generate.folder(_.extend(params || {}, {
+            return generate.folder(_.extend(params || {}, {
                 input: this.fs.options.base
             }));
         },
@@ -72,7 +72,6 @@ define([
             .then(function(_path) {
                 return generate.file(_.extend(params || {}, {
                     extension: "pdf",
-                    title: "test",
                     input: that.fs.options.base,
                     output: _path,
                     generator: format
@@ -90,10 +89,17 @@ define([
          * Refresh preview
          */
         refreshPreview: function() {
+            var that = this;
             console.log("start server on ", this.fs.options.base);
-            server.start(this.fs.options.base)
+
+            return server.stop()
+            .then(function() {
+                return that.buildBook();
+            })
+            .then(function(options) {
+                return server.start(options.output)
+            })
             .then(function(server) {
-                console.log("server ", server);
                 node.gui.Shell.openExternal('http://localhost:'+server.port);
             }, function(err) {
                 dialogs.alert("Error starting preview server:", err.message || err);
