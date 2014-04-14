@@ -61,26 +61,36 @@ require([
             bookMenu.append(new gui.MenuItem({
                 label: 'Preview Website',
                 click: function () {
-                    that.book.refreshPreview();
+                    that.book.refreshPreviewServer();
                 }
             }));
             bookMenu.append(new gui.MenuItem({
                 type: 'separator'
             }));
             bookMenu.append(new gui.MenuItem({
-                label: 'Build Website',
+                label: 'Build Website As...',
                 click: function () {
-                    
+                    dialogs.folder()
+                    .then(function(_path) {
+                        if (confirm("Do you really want to erase "+_path+" content and build the book website in it?")) {
+                            that.book.buildBook({
+                                output: _path
+                            })
+                            .then(function(options) {
+                                node.gui.Shell.showItemInFolder(path.join(_path, "index.html"));
+                            });
+                        }
+                    });
                 }
             }));
             bookMenu.append(new gui.MenuItem({
-                label: 'Build PDF',
+                label: 'Build PDF As...',
                 click: function () {
                     that.book.buildBookFile("pdf");
                 }
             }));
             bookMenu.append(new gui.MenuItem({
-                label: 'Build eBook',
+                label: 'Build eBook As...',
                 click: function () {
                     that.book.buildBookFile("ebook");
                 }

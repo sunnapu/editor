@@ -88,7 +88,7 @@ define([
         /*
          * Refresh preview
          */
-        refreshPreview: function() {
+        refreshPreviewServer: function() {
             var that = this;
             console.log("start server on ", this.fs.options.base);
 
@@ -99,8 +99,8 @@ define([
             .then(function(options) {
                 return server.start(options.output)
             })
-            .then(function(server) {
-                node.gui.Shell.openExternal('http://localhost:'+server.port);
+            .then(function() {
+                server.open();
             }, function(err) {
                 dialogs.alert("Error starting preview server:", err.message || err);
             });
