@@ -20,7 +20,8 @@
     "author": "Samy Pesse <samypesse@gmail.com>",
     "license": "Apache 2",
     "dependencies": {
-        "gitbook": "0.1.3"
+        "gitbook": "git+https://github.com/GitbookIO/gitbook.git#e4fa8aaca76ae3a49cf9995e7c84e3f63dc15532",
+        "send": "0.2.0"
     },
     "devDependencies": {
         "lodash": "2.4.1",

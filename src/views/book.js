@@ -3,11 +3,14 @@ define([
     "hr/promise",
     "utils/dialogs",
     "models/article",
+    "core/server",
     "views/grid",
     "views/summary",
     "views/editor",
     "views/preview"
-], function(hr, Q, dialogs, Article, Grid, Summary, Editor, Preview) {
+], function(hr, Q, dialogs, Article, server, Grid, Summary, Editor, Preview) {
+    var generate = node.require("gitbook").generate;
+
     var Book = hr.View.extend({
         className: "book",
         defaults: {
@@ -44,6 +47,57 @@ define([
             this.grid.addView(this.preview);
 
             this.openReadme();
+        },
+
+        /*
+         *  Build the book
+         */
+        buildBook: function(params, options) {
+            var that = this;
+
+            generate.folder(_.extend(params || {}, {
+                input: this.fs.options.base
+            }));
+        },
+
+        /*
+         *  Generate a file (pdf or ebook)
+         */
+        buildBookFile: function(format, params) {
+            var that = this;
+
+            var filename = format == "pdf" ? "book.pdf" : "book.epub";
+
+            dialogs.saveAs(filename)
+            .then(function(_path) {
+                return generate.file(_.extend(params || {}, {
+                    extension: "pdf",
+                    title: "test",
+                    input: that.fs.options.base,
+                    output: _path,
+                    generator: format
+                }))
+                .then(_.constant(_path));
+            })
+            .then(function(_path) {
+                node.gui.Shell.showItemInFolder(_path);
+            }, function(err) {
+                dialogs.alert("Error:", err.message || err);
+            });
+        },
+
+        /*
+         * Refresh preview
+         */
+        refreshPreview: function() {
+            console.log("start server on ", this.fs.options.base);
+            server.start(this.fs.options.base)
+            .then(function(server) {
+                console.log("server ", server);
+                node.gui.Shell.openExternal('http://localhost:'+server.port);
+            }, function(err) {
+                dialogs.alert("Error starting preview server:", err.message || err);
+            });
         },
 
         /*

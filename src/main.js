@@ -30,8 +30,13 @@ require([
 
             var that = this;
 
-            this.editor = null;
-            this.book = null;
+            this.book = new Book({
+                fs: new Fs({
+                    base: path.join(__dirname, "../intro")
+                })
+            });
+            this.book.update();
+            this.book.appendTo(this);
 
             var menu = new gui.Menu({ type: 'menubar' });
 
@@ -56,7 +61,7 @@ require([
             bookMenu.append(new gui.MenuItem({
                 label: 'Preview Website',
                 click: function () {
-                    
+                    that.book.refreshPreview();
                 }
             }));
             bookMenu.append(new gui.MenuItem({
@@ -71,13 +76,13 @@ require([
             bookMenu.append(new gui.MenuItem({
                 label: 'Build PDF',
                 click: function () {
-                    
+                    that.book.buildBookFile("pdf");
                 }
             }));
             bookMenu.append(new gui.MenuItem({
                 label: 'Build eBook',
                 click: function () {
-                    
+                    that.book.buildBookFile("ebook");
                 }
             }));
 
@@ -128,11 +133,6 @@ require([
         render: function() {
             gui.Window.get().show();
             return this.ready();
-        },
-
-        finish: function() {
-            if (!this.book) this.openPath(path.join(__dirname, "../intro"));
-            return Application.__super__.finish.apply(this, arguments);
         },
 
         setBook: function(book) {
