@@ -131,7 +131,7 @@ define([
                 })
                 // Write article
                 .then(function() {
-                    return that.writeArticle(article, "#"+article.get("title")+"\n")
+                    return that.writeArticle(article, "# "+article.get("title")+"\n")
                 })
                 // Save the article
                 .then(function() {
