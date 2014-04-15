@@ -62,6 +62,11 @@ define([
         // When clicking on a link in the content
         onClickLink: function(e) {
             e.preventDefault();
+
+            var href = $(e.currentTarget).attr("href");
+            if (/^https?:\/\//i.test(href)){
+                node.gui.Shell.openExternal(href);
+            }
         },
 
         // When article is update (write or open)
