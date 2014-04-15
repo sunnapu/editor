@@ -169,9 +169,7 @@ define([
                 that.editor.setValue(content);
                 that.editor.gotoLine(0);
                 that.ignoreChange = false;
-            }, function(err) {
-                dialogs.alert("Error", "Error loading this article: "+(err.message || err));
-            });
+            }, dialogs.error);
         },
 
         // When the state of the current article change

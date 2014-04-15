@@ -80,9 +80,7 @@ define([
             })
             .then(function(_path) {
                 node.gui.Shell.showItemInFolder(_path);
-            }, function(err) {
-                dialogs.alert("Error:", err.message || err);
-            });
+            }, dialogs.error);
         },
 
         /*
