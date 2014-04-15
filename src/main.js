@@ -4,9 +4,10 @@ require([
     "hr/hr",
     "hr/args",
     "utils/dialogs",
+    "utils/analytic",
     "core/fs",
     "views/book"
-], function(_, $, hr, args, dialogs, Fs, Book) {
+], function(_, $, hr, args, dialogs, analytic, Fs, Book) {
     var path = node.require("path");
     var gui = node.gui;
     var __dirname = node.require("../src/dirname");
@@ -156,6 +157,7 @@ require([
 
         // Open a book at a specific path
         openPath: function(_path) {
+            analytic.track("open");
             this.setBook(new Book({
                 fs: new Fs({
                     base: _path

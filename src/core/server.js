@@ -1,8 +1,9 @@
 define([
     "hr/hr",
     "hr/utils",
-    "hr/promise"
-], function(hr, _, Q) {
+    "hr/promise",
+    "utils/analytic"
+], function(hr, _, Q, analytic) {
     var http = node.require('http');
     var url = node.require('url');
     var send = node.require('send');
@@ -33,6 +34,8 @@ define([
             var that = this;
             if (!this.isRunning()) return Q();
 
+            analytic.track("server.stop");
+
             var d = Q.defer();
             this.running.close(function(err) {
                 that.running = null;
@@ -54,6 +57,8 @@ define([
             return pre
             .then(function() {
                 var d = Q.defer();
+
+                analytic.track("server.start");
 
                 that.running = http.createServer(function(req, res){
                     // Render error
