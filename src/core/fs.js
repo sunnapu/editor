@@ -79,6 +79,18 @@ define([
         },
 
         /*
+         * Check a file exists
+         *
+         * @return boolean
+         */
+        exists: function(_path) {
+            var that = this;
+            _path = this.realPath(_path);
+
+            return fs.existsSync(_path);
+        },
+
+        /*
          * Commit all changes
          *
          * @return Promise()
