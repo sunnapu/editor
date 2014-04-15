@@ -5,6 +5,8 @@
     left: 0px;
     bottom: 0px;
 
+    box-shadow: -1px 0px 5px rgba(196, 205, 212, 0.8) inset;
+
     h1 {
         margin: 10px;
         font-size: 16px;
@@ -13,14 +15,14 @@
     }
 
     hr {
-        border-color: #e1e1e1;
+        border-color: rgba(196, 205, 212, 1);
         margin: 0px;
-        box-shadow: 0px 1px #fff;
+        box-shadow: 0px -1px #fff;
     }
 
     .inner {
         position: absolute;
-        top: 50px;
+        top: 38px;
         bottom: 0px;
         right: 0px;
         left: 0px;
@@ -70,17 +72,18 @@
             
             position: relative;
             cursor: pointer;
-            background: @book-background;
 
             &.active {
                 > .chapter-title, > .chapter-title:hover {
                     background: rgba(196, 205, 212, 0.35);
+                    border-top-color: rgba(196, 205, 212, 1);
+                    border-bottom-color: rgba(196, 205, 212, 1);
                 }
             }
 
             &.modified {
                 > .chapter-title {
-                    border-color: @brand-warning !important;
+                    border-left-color: @brand-warning !important;
                 }
             }
 
@@ -110,9 +113,13 @@
                 padding: 8px 10px;
                 display: block;
                 border-left: 4px solid transparent;
+                border-top: 1px solid transparent;
+                border-bottom: 1px solid transparent;
 
                 &:hover {
                     background: rgba(196, 205, 212, 0.2);
+                    border-top-color: rgba(196, 205, 212, 0.4);
+                    border-bottom-color: rgba(196, 205, 212, 0.4);
                 }
             }
 
