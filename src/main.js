@@ -158,11 +158,18 @@ require([
         // Open a book at a specific path
         openPath: function(_path) {
             analytic.track("open");
-            this.setBook(new Book({
-                fs: new Fs({
-                    base: _path
-                })
-            }));
+
+            var that = this;
+            var _fs = new Fs({
+                base: _path
+            });
+
+            Book.valid(_fs)
+            .then(function() {
+                that.setBook(new Book({
+                    fs: _fs
+                }));
+            }, dialogs.error);
         },
 
         // Click to select a new local folder

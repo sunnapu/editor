@@ -200,6 +200,11 @@ define([
             return Dialogs.file({
                 nwdirectory: true
             });
+        },
+
+        error: function(err) {
+            Dialogs.alert("Error:", err.message || err);
+            return Q.reject(err);
         }
     };
 

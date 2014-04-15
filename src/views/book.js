@@ -221,6 +221,17 @@ define([
                 $(this).toggleClass(className, $(this).data("article") == article.get("path"));
             });
         }
+    }, {
+        /*
+         *  Valid that a fs is a gitbook
+         */
+        valid: function(fs) {
+            if (fs.exists("README.md") && fs.exists("SUMMARY.md")) {
+                return Q();
+            } else {
+                return Q.reject(new Error("Invalid GitBook: need README.md and SUMMARY.md"));
+            }
+        }
     });
 
     return Book;
