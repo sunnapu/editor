@@ -1,14 +1,16 @@
 require([
     "hr/utils",
     "hr/dom",
+    "hr/promise",
     "hr/hr",
     "hr/args",
     "utils/dialogs",
     "utils/analytic",
     "core/fs",
     "views/book"
-], function(_, $, hr, args, dialogs, analytic, Fs, Book) {
+], function(_, $, Q, hr, args, dialogs, analytic, Fs, Book) {
     var path = node.require("path");
+    var wrench = node.require("wrench");
     var gui = node.gui;
     var __dirname = node.require("../src/dirname");
 
@@ -43,7 +45,13 @@ require([
 
             var fileMenu = new node.gui.Menu();
             fileMenu.append(new gui.MenuItem({
-                label: 'Open',
+                label: 'New Book',
+                click: function () {
+                    that.openNewBook();
+                }
+            }));
+            fileMenu.append(new gui.MenuItem({
+                label: 'Open Book',
                 click: function () {
                     that.openFolderSelection();
                 }
@@ -179,6 +187,21 @@ require([
             dialogs.folder()
             .then(function(_path) {
                 that.openPath(_path);
+            });
+        },
+
+        // Create a new book and open it
+        openNewBook: function() {
+            var that = this;
+
+            dialogs.folder()
+            .then(function(_path) {
+                if (confirm("Do you really want to erase "+_path+" content and create a new book in it?")) {
+                    Q.nfcall(wrench.copyDirRecursive, path.join(__dirname, "../example"), _path, {forceDelete: true})
+                    .then(function() {
+                        that.openPath(_path);
+                    });
+                }
             });
         }
     });

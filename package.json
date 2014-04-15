@@ -22,7 +22,8 @@
     "dependencies": {
         "gitbook": "0.2.0",
         "send": "0.2.0",
-        "mixpanel": "0.0.19"
+        "mixpanel": "0.0.19",
+        "wrench": "1.5.8"
     },
     "devDependencies": {
         "lodash": "2.4.1",
