@@ -80,7 +80,7 @@ module.exports = function (grunt) {
                 app_name: "GitBook",
                 build_dir: './appbuilds',
                 mac: true,
-                win: false,
+                win: true,
                 linux32: false,
                 linux64: false,
                 mac_icns: "./build/static/images/icons/512.icns",
