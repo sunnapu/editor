@@ -88,7 +88,14 @@ module.exports = function (grunt) {
                 version: NW_VERSION,
                 zip: false
             },
-            src: ['./**/*']
+            src: [
+                "./**/*",
+                "!./appbuilds/**",
+                "!./node_modules/hr.js/**",
+                "!./node_modules/grunt-*/**",
+                "!./node_modules/grunt/**",
+                "!./node_modules/nw-gyp/**"
+            ]
         },
         clean: {
             build: ['build/'],
@@ -103,9 +110,14 @@ module.exports = function (grunt) {
 
     // Release
     grunt.registerTask('build-apps', [
-        'clean:releases',
         'build',
         'nodewebkit'
+    ]);
+
+    // Clean
+    grunt.registerTask('clean', [
+        'clean:build',
+        'clean:releases'
     ]);
 
     grunt.registerTask('default', [
