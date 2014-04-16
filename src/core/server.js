@@ -14,6 +14,7 @@ define([
 
             this.running = null;
             this.port = 0;
+            this.sockets = [];
         },
 
         // Return true if the server is running
@@ -44,6 +45,10 @@ define([
                 if (err) d.reject(err);
                 else d.resolve();
             });
+
+            for (var i = 0; i < this.sockets.length; i++) {
+                this.sockets[i].destroy();
+            }
 
             return d.promise;
         },
@@ -80,6 +85,14 @@ define([
                     .on('error', error)
                     .on('directory', redirect)
                     .pipe(res);
+                });
+
+                that.running.on('connection', function (socket) {
+                    that.sockets.push(socket);
+                    socket.setTimeout(4000);
+                    socket.on('close', function () {
+                        that.sockets.splice(that.sockets.indexOf(socket), 1);
+                    });
                 });
 
                 that.running.listen(port, function(err) {
