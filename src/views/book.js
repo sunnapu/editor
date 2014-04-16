@@ -197,6 +197,13 @@ define([
             .then(function() {
                 that.articles[path].saved = true;
                 that.triggerArticleState(article);
+
+                if (server.isRunning()) {
+                    dialogs.confirm("Restart Preview Server", "Do you want to restart the preview server to access your last changes?")
+                    .then(function() {
+                        that.refreshPreviewServer();
+                    });
+                }
             });
         },
         triggerArticleState: function(article) {
