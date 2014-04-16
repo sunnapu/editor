@@ -128,6 +128,13 @@ require([
                 }
             }));
 
+
+            // Get reference to App's menubar
+            // if we set this later menu entries are out of order
+            if(process.platform === 'darwin') {
+                gui.Window.get().menu = menu;
+            }
+
             menu.insert(new gui.MenuItem({
                 label: 'File',
                 submenu: fileMenu
@@ -146,7 +153,9 @@ require([
             }));
 
             // Set the window's menu
-            gui.Window.get().menu = menu;
+            if(process.platform !== 'darwin') {
+                gui.Window.get().menu = menu;
+            }
 
         },
 
