@@ -133,7 +133,7 @@ require([
             menu.insert(new gui.MenuItem({
                 label: 'File',
                 submenu: fileMenu
-            }), 1);
+            }), process.platform === 'darwin' ? 1 : 0);
             menu.append(new gui.MenuItem({
                 label: 'Book',
                 submenu: bookMenu
@@ -146,7 +146,7 @@ require([
                 label: 'Help',
                 submenu: helpMenu
             }));
-            
+
         },
 
         render: function() {
