@@ -128,8 +128,6 @@ require([
                 }
             }));
 
-            gui.Window.get().menu = menu;
-
             menu.insert(new gui.MenuItem({
                 label: 'File',
                 submenu: fileMenu
@@ -146,6 +144,9 @@ require([
                 label: 'Help',
                 submenu: helpMenu
             }));
+
+            // Set the window's menu
+            gui.Window.get().menu = menu;
 
         },
 
